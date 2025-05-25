@@ -4,32 +4,51 @@ import "../globals.css";
 
 import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
+import { loginRequest } from "../_api/auth/login";
+import { useAuthStore } from "../_store/authStore";
 
 type Inputs = {
   usuario: string;
   password: string;
 };
 
+interface AuthStore {
+  token: string;
+  nombre_apellido: string;
+  id_usuario: number;
+  id_rol: number;
+  setAuthInfo: (profileAuth: AuthStore) => void;
+  setLogout: () => void;
+}
+
 export default function Login() {
+  const setToken = useAuthStore(
+    (state: unknown) => (state as AuthStore).setAuthInfo
+  );
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<Inputs>();
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
     // Aquí puedes manejar el envío del formulario
-    console.log(data);
+
+    const result = await loginRequest(data);
+    //validar el resultado de la petición
+    if (result.status !== 200) {
+      console.error("Error al iniciar sesión", result);
+      return;
+    }
+    // Si la petición fue exitosa, guardar el token en el store
+    console.log("Login successful", result.data);
+    setToken(result.data);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-200">
       <div className="bg-linear-to-t from-[#101828] to-[#293844] p-10 rounded-xl shadow-md w-full max-w-sm flex flex-col items-center space-y-6">
-        <Image
-          src="/logo.png"
-          alt="SisPET"
-          width={120}
-          height={120}
-        />
+        <Image src="/logo.png" alt="SisPET" width={120} height={120} />
 
         <form className="w-full space-y-4 " onSubmit={handleSubmit(onSubmit)}>
           <div>
