@@ -9,7 +9,7 @@ import { persist } from "zustand/middleware";
 //   isAuth: boolean;
 //   setAuthInfo: (profileAuth: AuthStore) => void;
 //   setLogout: () => void;
-  
+
 // }
 
 interface AuthStore {
@@ -18,6 +18,8 @@ interface AuthStore {
   id_usuario: number;
   id_rol: number;
 }
+
+
 
 export const useAuthStore = create(
   persist(

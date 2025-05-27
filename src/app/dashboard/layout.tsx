@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import "../globals.css";
 
 import {
@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useAuthStore } from "../_store/authStore";
 
 // interface LayoutProps {
 //   children: ReactNode;
@@ -25,20 +26,22 @@ const navItems = [
   { name: "Documents", icon: FileText, href: "/documents" },
   { name: "Reports", icon: PieChart, href: "/reports" },
   { name: "Settings", icon: Settings, href: "/settings" },
-  { name: "Logout", icon: Settings, href: "/logout" },
+  { name: "Cerrar Sesión", icon: Settings, href: "/logout" },
 ];
 
-const teamItems = [
-  { name: "Heroicons", initial: "H" },
-  { name: "Tailwind Labs", initial: "T" },
-  { name: "Workcation", initial: "W" },
-];
-
+interface AuthStore {
+  nombre_apellido: string;
+  id_usuario: number;
+  id_rol: number;
+}
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // recuperar datos del store de autenticación
+  const { nombre_apellido, id_usuario, id_rol } = useAuthStore() as AuthStore;
+
   return (
     <div className="bg-gray-100">
       <div className="flex min-h-screen font-sans">
@@ -60,17 +63,6 @@ export default function DashboardLayout({
                 </Link>
               ))}
             </nav>
-            <div className="mt-6 px-4 text-sm text-gray-400">Your teams</div>
-            <div className="mt-2 space-y-1 px-4">
-              {teamItems.map(({ name, initial }) => (
-                <div key={name} className="flex items-center space-x-3 py-1">
-                  <div className="w-6 h-6 bg-gray-700 text-center rounded-full text-xs flex items-center justify-center">
-                    {initial}
-                  </div>
-                  <span className="text-sm text-white">{name}</span>
-                </div>
-              ))}
-            </div>
           </div>
           <div className="p-4">
             <button className="flex items-center space-x-2 text-sm text-gray-400 hover:text-white">
@@ -82,38 +74,25 @@ export default function DashboardLayout({
 
         <main className="flex-1 bg-white">
           <header className="flex items-center justify-between px-6 py-4 border-b">
-            <input
-              type="text"
-              placeholder="Search"
-              className="w-1/3 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+            <div className="w-1 px-3 py-2 bordertext-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <h1 className="text-xl font-semibold text-gray-800">
+              Bienvenido al Dashboard
+            </h1>
             <div className="flex items-center space-x-4">
-              <button className="text-gray-500 hover:text-gray-700">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-5 h-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15 17h5l-1.405-1.405M19 13V6a2 2 0 00-2-2h-4a2 2 0 00-2 2v7m4 4h-4m0 0H5l1.405-1.405"
-                  />
-                </svg>
-              </button>
               <div className="flex items-center space-x-2">
                 <Image
-                  src="/avatar.jpg"
+                  src="/avatar.png"
                   alt="User Avatar"
                   width={32}
                   height={32}
                   className="rounded-full"
                 />
                 <span className="text-sm font-medium text-gray-700">
-                  Tom Cook
+                  {nombre_apellido || "Usuario Anónimo"}
+                </span>
+                <br />
+                <span className="text-xs text-gray-500">
+                  ID: {id_usuario || "N/A"} - Rol: {id_rol || "N/A"}
                 </span>
               </div>
             </div>

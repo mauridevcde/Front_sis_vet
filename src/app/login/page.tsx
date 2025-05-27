@@ -1,12 +1,11 @@
 "use client";
-
 import "../globals.css";
-
 import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
 import { loginRequest } from "../_api/auth/login";
 import { useAuthStore } from "../_store/authStore";
-
+import { useState } from "react";
+import { redirect } from "next/navigation";
 type Inputs = {
   usuario: string;
   password: string;
@@ -22,6 +21,10 @@ interface AuthStore {
 }
 
 export default function Login() {
+  const [errorAutenticacion, seterrorerrorAutenticacion] = useState(false);
+  //espiner de carga del boton de login
+  const [loading, setLoading] = useState(false);
+
   const setToken = useAuthStore(
     (state: unknown) => (state as AuthStore).setAuthInfo
   );
@@ -32,17 +35,24 @@ export default function Login() {
     formState: { errors },
   } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    // Aquí puedes manejar el envío del formulario
-
+    setLoading(true);
+    
     const result = await loginRequest(data);
-    //validar el resultado de la petición
-    if (result.status !== 200) {
-      console.error("Error al iniciar sesión", result);
-      return;
+
+    // Si la petición fue exitosa, redirigir al usuario a la página principal del dashboard
+
+    if (result.data.msg !== "usuario o contraseña incorrecta") {
+      setLoading(false);
+      seterrorerrorAutenticacion(false);
+      // Guardar la información del usuario en el store
+      setToken(result.data);
+      redirect("/dashboard");
     }
-    // Si la petición fue exitosa, guardar el token en el store
-    console.log("Login successful", result.data);
-    setToken(result.data);
+
+    setTimeout(() => {
+      seterrorerrorAutenticacion(true);
+      setLoading(false);
+    }, 1000);
   };
 
   return (
@@ -85,12 +95,38 @@ export default function Login() {
               )}
             </span>
           </div>
-          <button
-            type="submit"
-            className="w-42 ml-16 mt-4 py-2 rounded-full bg-[#9C855F] text-white font-bold shadow-md hover:bg-[#8a7653] transition"
-          >
-            LOGIN
-          </button>
+          <span className="text-red-500 text-sm mt-2">
+            {errorAutenticacion && "Usuario o contraseña incorrectos"}
+          </span>
+          {loading ? (
+            <button
+              disabled={true}
+              className="w-42 ml-16 mt-4 py-2 rounded-full bg-[#9C855F] text-white font-bold shadow-md  transition"
+            >
+              <Image
+                src="/loading.svg"
+                alt="Loading"
+                width={20}
+                height={20}
+                className="mx-auto"
+              />
+            </button>
+          ) : (
+            <button
+              disabled={loading}
+              type="submit"
+              className="w-full bg-[#9C855F] text-white py-2 rounded-full hover:bg-[#7a6b4c]"
+            >
+              Iniciar Sesión
+            </button>
+          )}
+          <br />
+          <span className="text-white text-sm flex justify-center gap-1">
+            ¿No tienes una cuenta?{""}
+            <a href="/register" className="text-[#9C855F] font-bold">
+              Regístrate
+            </a>
+          </span>
         </form>
       </div>
     </div>
