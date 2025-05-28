@@ -1,11 +1,13 @@
 "use client";
+import React, { useState } from "react";
 import "../globals.css";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
-import { loginRequest } from "../_api/auth/login";
 import { useAuthStore } from "../_store/authStore";
-import { useState } from "react";
-import { redirect } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { loginRequest } from "../_api/auth/login";
+import { useRouter } from "next/navigation";
+
 type Inputs = {
   usuario: string;
   password: string;
@@ -21,38 +23,44 @@ interface AuthStore {
 }
 
 export default function Login() {
-  const [errorAutenticacion, seterrorerrorAutenticacion] = useState(false);
-  //espiner de carga del boton de login
-  const [loading, setLoading] = useState(false);
-
-  const setToken = useAuthStore(
-    (state: unknown) => (state as AuthStore).setAuthInfo
-  );
-
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<Inputs>();
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    setLoading(true);
-    
-    const result = await loginRequest(data);
 
-    // Si la petición fue exitosa, redirigir al usuario a la página principal del dashboard
+  const [cargando, setCargando] = useState(false);
+  const [mensaje, setMensaje] = useState("");
 
-    if (result.data.msg !== "usuario o contraseña incorrecta") {
-      setLoading(false);
-      seterrorerrorAutenticacion(false);
-      // Guardar la información del usuario en el store
-      setToken(result.data);
-      redirect("/dashboard");
-    }
+  const setToken = useAuthStore(
+    (state: unknown) => (state as AuthStore).setAuthInfo
+  );
 
-    setTimeout(() => {
-      seterrorerrorAutenticacion(true);
-      setLoading(false);
-    }, 1000);
+  const router = useRouter();
+
+  const loginMutation = useMutation({
+    mutationFn: loginRequest,
+    onMutate: () => {
+      setCargando(true);
+      setMensaje(""); // Limpiar mensaje
+    },
+    onSuccess: async (data) => {
+      setMensaje("Iniciando sesión...");
+      setToken(data.data);
+      setTimeout(() => {
+        setMensaje("");
+        setCargando(false);
+        router.push("/dashboard");
+      }, 1000); // Espera 1 segundo mostrando el mensaje antes de redirigir
+    },
+    onError: () => {
+      setMensaje(""); // Limpiar mensaje si hay error
+      setCargando(false);
+    },
+  });
+
+  const onSubmit: SubmitHandler<Inputs> = (dataForm) => {
+    loginMutation.mutate(dataForm);
   };
 
   return (
@@ -62,7 +70,7 @@ export default function Login() {
 
         <form className="w-full space-y-4 " onSubmit={handleSubmit(onSubmit)}>
           <div>
-            <label className="block text-white mb-1 ">User</label>
+            <label className="block text-white mb-1 ">Usuario</label>
             <input
               {...register("usuario", {
                 required: "El usuario es obligatorio",
@@ -70,42 +78,42 @@ export default function Login() {
               type="text"
               className="w-full bg-white px-4 py-2 rounded-full outline-none text-gray-800"
               placeholder="Ingrese su usuario"
+              disabled={cargando}
             />
             {errors.usuario && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="text-red-500 text-sm mt-1 ">
                 {errors.usuario.message}
               </p>
             )}
           </div>
           <div>
-            <label className="block text-white mb-1">Password</label>
+            <label className="block text-white mb-1">Contraseña</label>
             <input
               {...register("password", {
-                required: "La contraseña es obligatorio",
+                required: "La contraseña es obligatoria",
               })}
               type="password"
               className="w-full px-4 bg-white py-2 rounded-full outline-none text-gray-800"
               placeholder="Ingrese su contraseña"
+              disabled={cargando}
             />
             <span>
-              {errors.usuario && (
+              {errors.password && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.usuario.message}
+                  {errors.password.message}
                 </p>
               )}
             </span>
           </div>
-          <span className="text-red-500 text-sm mt-2">
-            {errorAutenticacion && "Usuario o contraseña incorrectos"}
-          </span>
-          {loading ? (
+
+          {cargando ? (
             <button
-              disabled={true}
-              className="w-42 ml-16 mt-4 py-2 rounded-full bg-[#9C855F] text-white font-bold shadow-md  transition"
+              className="w-42 ml-16 mt-4 py-2 rounded-full bg-[#9C855F] text-white font-bold shadow-md transition"
+              disabled
             >
               <Image
                 src="/loading.svg"
-                alt="Loading"
+                alt="Cargando"
                 width={20}
                 height={20}
                 className="mx-auto"
@@ -113,16 +121,32 @@ export default function Login() {
             </button>
           ) : (
             <button
-              disabled={loading}
               type="submit"
-              className="w-full bg-[#9C855F] text-white py-2 rounded-full hover:bg-[#7a6b4c]"
+              className="w-42 ml-16 mt-4 py-2 rounded-full bg-[#9C855F] text-white font-bold shadow-md transition"
             >
               Iniciar Sesión
             </button>
           )}
           <br />
+          {mensaje === "Iniciando sesión..." && (
+            <div className="flex flex-col items-center justify-center mt-2">
+              <Image
+                src="/successLogin.gif"
+                alt="Cargando"
+                width={32}
+                height={32}
+                className="animate-bounce mb-2"
+              />
+              <span className="text-sm text-green-200 font-semibold animate-pulse">
+               ✅Redirigiéndote al panel principal...
+              </span>
+            </div>
+          )}
+          <span className="text-red-400 text-sm flex justify-center ">
+            {loginMutation.isError && "Usuario o contraseña incorrectos"}
+          </span>
           <span className="text-white text-sm flex justify-center gap-1">
-            ¿No tienes una cuenta?{""}
+            ¿No tienes una cuenta?{" "}
             <a href="/register" className="text-[#9C855F] font-bold">
               Regístrate
             </a>
