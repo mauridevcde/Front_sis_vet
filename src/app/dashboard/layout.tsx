@@ -118,7 +118,7 @@ export default function DashboardLayout({
   const { nombre_apellido, id_usuario, id_rol } = useAuthStore() as AuthStore;
 
   return (
-    <div className="bg-gray-100 min-h-screen flex">
+    <div className="bg-red-500 min-h-screen flex">
       {/* Botón menú hamburguesa solo en móvil */}
       <button
         className="md:hidden fixed bottom-4 right-4 z-50 bg-gray-900 text-white p-2 rounded-full shadow-lg"
@@ -132,8 +132,8 @@ export default function DashboardLayout({
       <aside
         className={`
           bg-gray-900 text-white flex flex-col justify-between
-          transition-transform duration-300
-          w-64 z-40
+          transition-transform duration-300 overflow-auto
+          w-64 z-40 text-xs
           fixed top-0 left-0 h-screen
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           md:static md:translate-x-0 md:flex
@@ -152,7 +152,7 @@ export default function DashboardLayout({
               <CloseIcon className="w-6 h-6" />
             </button>
           </div>
-          <nav className="mt-4 space-y-4">
+          <nav className="mt-2 space-y-4">
             {navItems.map(({ name, icon: Icon, href, btnDown, submenu }) => (
               <div key={name}>
                 {btnDown ? (
@@ -241,7 +241,7 @@ export default function DashboardLayout({
             </div>
           </div>
         </header>
-        <div className="p-6 min-h-[calc(100vh-4rem)] bg-gray-50 shadow-md">
+        <div className="p-2 flex h- bg-green-200 shadow-md">
           {children}
         </div>
       </main>
