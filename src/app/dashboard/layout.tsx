@@ -217,11 +217,9 @@ export default function DashboardLayout({
 
       {/* Main */}
       <main className="flex-2 bg-white w-auto  ml-0 transition-all duration-300">
-        <header className="flex items-center justify-between px-6 py-4 border-b">
+        <header className="flex items-center justify-between px-6 py-4  bg-white shadow-md">
           <div className="w-1 px-3 py-2 bordertext-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          <h1 className="text-xl font-semibold text-gray-800">
-            Bienvenido al Dashboard
-          </h1>
+         
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <Image
@@ -241,7 +239,7 @@ export default function DashboardLayout({
             </div>
           </div>
         </header>
-        <div className="flex justify-center  gap-3 w-auto h-auto  p-2  ">
+        <div className="flex mt-4 justify-center  gap-3 w-auto h-auto  p-2">
           {children}
         </div>
       </main>
