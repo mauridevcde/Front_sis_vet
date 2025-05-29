@@ -1,3 +1,4 @@
+
 import QueryProvider from "./components/QueryProvider";
 
 export const metadata = {
