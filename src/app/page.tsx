@@ -1,5 +1,8 @@
-'use client';
-import './globals.css';
+"use client";
+import "./globals.css";
+
+import "~lucide-static/font/Lucide.css";
+
 export default function Example() {
   return (
     <div className="bg-white">
@@ -10,7 +13,13 @@ export default function Example() {
             aria-hidden="true"
             className="absolute top-1/2 left-1/2 -z-10 size-256 -translate-y-1/2 mask-[radial-gradient(closest-side,white,transparent)] sm:left-full sm:-ml-80 lg:left-1/2 lg:ml-0 lg:-translate-x-1/2 lg:translate-y-0"
           >
-            <circle r={512} cx={512} cy={512} fill="url(#759c1415-0410-454c-8f7c-9a820de03641)" fillOpacity="0.7" />
+            <circle
+              r={512}
+              cx={512}
+              cy={512}
+              fill="url(#759c1415-0410-454c-8f7c-9a820de03641)"
+              fillOpacity="0.7"
+            />
             <defs>
               <radialGradient id="759c1415-0410-454c-8f7c-9a820de03641">
                 <stop stopColor="#2E8EC1" />
@@ -20,7 +29,8 @@ export default function Example() {
           </svg>
           <div className="mx-auto max-w-md text-center lg:mx-0 lg:flex-auto lg:py-32 lg:text-left">
             <h2 className="text-3xl font-semibold tracking-tight text-balance text-white sm:text-4xl">
-              Mejora el control de tu Veterinaria con nuestro sistema de gestion.
+              Mejora el control de tu Veterinaria con nuestro sistema de
+              gestion.
             </h2>
             <p className="mt-6 text-lg/8 text-pretty text-gray-300">
               SisPet la mejor solucion para aquello que amas hacer.
@@ -32,7 +42,10 @@ export default function Example() {
               >
                 Iniciar Ahora
               </a>
-              <a href="https://github.com/mauridevcde" className="text-sm/6 font-semibold text-white">
+              <a
+                href="https://github.com/mauridevcde"
+                className="text-sm/6 font-semibold text-white"
+              >
                 Leer Más <span aria-hidden="true">→</span>
               </a>
             </div>
@@ -49,5 +62,5 @@ export default function Example() {
         </div>
       </div>
     </div>
-  )
+  );
 }
