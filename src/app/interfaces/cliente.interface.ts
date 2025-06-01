@@ -6,6 +6,5 @@ export interface Cliente {
   nro_tel: string;
   direccion: string;
   correo: string;
-  id_mascota: number;
   estado: number;
 }

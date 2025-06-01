@@ -1,9 +1,11 @@
 "use client";
 import React, { useState, useRef } from "react";
+import "primereact/resources/themes/lara-light-indigo/theme.css";
 import { classNames } from "primereact/utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getAllClientes } from "@/app/_api/clientes/getAllClientes";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { Toolbar } from "primereact/toolbar";
@@ -11,16 +13,13 @@ import { InputText } from "primereact/inputtext";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { Dialog } from "primereact/dialog";
-
-import "primereact/resources/themes/lara-light-indigo/theme.css";
 import { Trash2, SquarePen } from "lucide-react";
 import { Cliente } from "../../interfaces/cliente.interface";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAllClientes } from "@/app/_api/clientes/getAllClientes";
 import { SyncLoader } from "react-spinners";
 import { postCliente } from "@/app/_api/clientes/postClientes";
-import { SelectButton } from "primereact/selectbutton";
-import { Dropdown } from "primereact/dropdown";
+
+import { putCliente } from "@/app/_api/clientes/putClientes";
+import { deleteClientes } from "@/app/_api/clientes/deleteClientes";
 
 export default function Clientes() {
   const emptyClient: Cliente = {
@@ -31,18 +30,19 @@ export default function Clientes() {
     nro_tel: "",
     direccion: "",
     correo: "",
-    id_mascota: 0,
     estado: 1,
   };
 
   // const [clients, setClients] = useState<Cliente[] | null>(null);
   const [clientDialog, setClientDialog] = useState(false);
+
   const [deleteClientDialog, setDeleteClientDialog] = useState(false);
-  const [deleteClientsDialog, setDeleteClientsDialog] = useState(false);
+
   const [client, setClient] = useState<Cliente>(emptyClient);
   const [selectedClients, setSelectedClients] = useState<Cliente[] | null>(
     null
   );
+
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState<string | null>(null);
   const toast = useRef<Toast>(null);
@@ -73,13 +73,9 @@ export default function Clientes() {
     setDeleteClientDialog(false);
   };
 
-  const hideDeleteClientsDialog = () => {
-    setDeleteClientsDialog(false);
-  };
-
   const queryClient = useQueryClient();
   //aca se realiza el post del cliente.
-  const mutation = useMutation({
+  const mutationNewClient = useMutation({
     mutationFn: postCliente,
     onSuccess: async () => {
       toast.current?.show({
@@ -88,15 +84,96 @@ export default function Clientes() {
         detail: "Cliente creado",
         life: 3000,
       });
-      queryClient.invalidateQueries({ queryKey: ["clientes"] });
+      queryClient.invalidateQueries({ queryKey: ["allclientes"] });
       setClientDialog(false);
       setClient(emptyClient);
     },
+    onError: (error) => {
+      console.error("Error al crear cliente:", error);
+      const zodErrors = error?.response?.data?.errors;
+
+      const message = Array.isArray(zodErrors)
+        ? zodErrors.map((e) => e.message).join("\nn")
+        : error?.response?.data?.message || "Error desconocido.";
+
+      toast.current?.show({
+        severity: "error",
+        summary: "Errores de validación",
+        detail: message,
+        life: 6000,
+      });
+    },
   });
+
+  const updateClientMutation = useMutation({
+    mutationFn: putCliente,
+    onSuccess: () => {
+      toast.current?.show({
+        severity: "success",
+        summary: "Cliente actualizado",
+        detail: "El cliente fue actualizado correctamente.",
+        life: 3000,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["allclientes"] });
+      setClientDialog(false);
+    },
+    onError: (error: any) => {
+      console.error("Error al actualizar cliente:", error);
+      const zodErrors = error?.response?.data?.errors;
+
+      const message = Array.isArray(zodErrors)
+        ? zodErrors.map((e: any) => e.message).join("\n")
+        : error?.response?.data?.message || "Error desconocido.";
+
+      toast.current?.show({
+        severity: "error",
+        summary: "Errores de validación",
+        detail: message,
+        life: 6000,
+      });
+    },
+  });
+
+  const deleteClientMutation = useMutation({
+    mutationFn: deleteClientes,
+    onSuccess: () => {
+      toast.current?.show({
+        severity: "success",
+        summary: "Cliente Eliminado",
+        detail: "El cliente fue eliminado correctamente.",
+        life: 3000,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["allclientes"] });
+      setClientDialog(false);
+    },
+    onError: (error) => {
+      console.error("Error al actualizar cliente:", error);
+
+      toast.current?.show({
+        severity: "error",
+        summary: "Errores de validación",
+        detail: error.message,
+        life: 6000,
+      });
+    },
+  });
+
+  //aca verificamos si existe id entonces actualiza  sino crea.
   const saveClient = () => {
+    console.log("ver que pasa por detras: ", client);
     setSubmitted(true);
-    console.log("btn guardar", client);
-    mutation.mutate(client);
+    if (client.nombre_apellido.trim()) {
+      if (client.id_cliente !== 0) {
+        console.log("actualizar");
+
+        updateClientMutation.mutate(client); // ← actualiza cliente
+      } else {
+        console.log("crear");
+        mutationNewClient.mutate(client); // ← crea cliente
+      }
+    }
   };
 
   const editClient = (client: Cliente) => {
@@ -110,43 +187,13 @@ export default function Clientes() {
   };
 
   const deleteClient = () => {
-    const _clients =
-      clients?.filter((val) => val.id_cliente !== client.id_cliente) || [];
-    setClients(_clients);
     setDeleteClientDialog(false);
-    setClient(emptyClient);
-    toast.current?.show({
-      severity: "success",
-      summary: "Successful",
-      detail: "Cliente eliminado",
-      life: 3000,
-    });
-  };
-
-  const findIndexById = (id: number) => {
-    return clients?.findIndex((c) => c.id_cliente === id) ?? -1;
+    console.log("cliente", client.id_cliente);
+    deleteClientMutation.mutate(client);
   };
 
   const exportCSV = () => {
     dt.current?.exportCSV();
-  };
-
-  const confirmDeleteSelected = () => {
-    setDeleteClientsDialog(true);
-  };
-
-  const deleteSelectedClients = () => {
-    const _clients =
-      clients?.filter((val) => !selectedClients?.includes(val)) || [];
-    setClients(_clients);
-    setDeleteClientsDialog(false);
-    setSelectedClients(null);
-    toast.current?.show({
-      severity: "success",
-      summary: "Successful",
-      detail: "Clientes eliminados",
-      life: 3000,
-    });
   };
 
   const header = (
@@ -171,7 +218,12 @@ export default function Clientes() {
         outlined
         onClick={hideDialog}
       />
-      <Button label="Guardar" icon="pi pi-check" onClick={saveClient} />
+      <Button
+        label="Guardar"
+        icon="pi pi-check"
+        disabled={isError}
+        onClick={saveClient}
+      />
     </>
   );
 
@@ -192,24 +244,6 @@ export default function Clientes() {
     </>
   );
 
-  const deleteClientsDialogFooter = (
-    <>
-      <Button
-        label="No"
-        icon="pi pi-times"
-        outlined
-        onClick={hideDeleteClientsDialog}
-      />
-      <Button
-        label="Sí"
-        icon="pi pi-check"
-        severity="danger"
-        onClick={deleteSelectedClients}
-      />
-    </>
-  );
-
-
   return (
     <>
       {isPending ? (
@@ -217,6 +251,8 @@ export default function Clientes() {
       ) : (
         <div>
           <Toast ref={toast} />
+          {/* motal de mascotas */}
+
           <div className="p-3 bg-gray-100 text-center rounded-lg shadow-md">
             <h1 className="text-3xl font-semibold text-gray-800">Clientes</h1>
           </div>
@@ -246,9 +282,12 @@ export default function Clientes() {
 
             <DataTable
               ref={dt}
+              sortField="nombre_apellido"
+              sortOrder={-1}
               value={clients || []}
               selection={selectedClients}
               dataKey="id_cliente"
+              color="black"
               paginator
               rows={5}
               globalFilter={globalFilter}
@@ -257,6 +296,7 @@ export default function Clientes() {
               <Column
                 field="nombre_apellido"
                 header="Nombre y Apellido"
+                style={{ color: "#374151" }}
                 sortable
               />
               <Column field="ruc" header="RUC" />
@@ -320,30 +360,8 @@ export default function Clientes() {
               {submitted && !client.nombre_apellido && (
                 <small className="p-error">El nombre es obligatorio.</small>
               )}
-
-              <label htmlFor="id_mascota" className="font-bold">
-                Mascotas
-              </label>
-              <Dropdown
-                id="id_mascota"
-                value={client.id_mascota}
-                options={[
-                  { label: "Mascota 1", value: 1 },
-                  { label: "Mascota 2", value: 2 },
-                  // Agrega aquí las opciones reales de mascotas
-                ]}
-                onChange={(e) =>
-                  setClient({ ...client, id_mascota: e.value })
-                }
-                required
-                className={classNames({
-                  "p-invalid": submitted && !client.id_mascota,
-                })}
-              />
-              {submitted && !client.id_mascota && (
-                <small className="p-error">El nombre es obligatorio.</small>
-              )}
             </div>
+
             <div className="field">
               <label htmlFor="ruc" className="font-bold">
                 RUC
@@ -424,13 +442,15 @@ export default function Clientes() {
               </label>
               <InputText
                 id="correo"
+                type="email"
+                keyfilter="email"
                 value={client.correo}
                 required
                 onChange={(e) =>
                   setClient({ ...client, correo: e.target.value })
                 }
                 className={classNames({
-                  "p-invalid": submitted && !client.ruc,
+                  "p-invalid": submitted && !client.correo,
                 })}
               />
               {submitted && !client.correo && (
@@ -457,28 +477,6 @@ export default function Clientes() {
                 <span>
                   ¿Estás seguro que deseas eliminar a{" "}
                   <b>{client.nombre_apellido}</b>?
-                </span>
-              )}
-            </div>
-          </Dialog>
-
-          <Dialog
-            visible={deleteClientsDialog}
-            style={{ width: "32rem" }}
-            breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-            header="Confirmar"
-            modal
-            footer={deleteClientsDialogFooter}
-            onHide={hideDeleteClientsDialog}
-          >
-            <div className="confirmation-content">
-              <i
-                className="pi pi-exclamation-triangle mr-3"
-                style={{ fontSize: "2rem" }}
-              />
-              {client && (
-                <span>
-                  ¿Estás seguro que deseas eliminar los clientes seleccionados?
                 </span>
               )}
             </div>
