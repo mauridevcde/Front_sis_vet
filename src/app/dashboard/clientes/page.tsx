@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { classNames } from "primereact/utils";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -15,8 +15,12 @@ import { Dialog } from "primereact/dialog";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import { Trash2, SquarePen } from "lucide-react";
 import { Cliente } from "../../interfaces/cliente.interface";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllClientes } from "@/app/_api/clientes/getAllClientes";
+import { SyncLoader } from "react-spinners";
+import { postCliente } from "@/app/_api/clientes/postClientes";
+import { SelectButton } from "primereact/selectbutton";
+import { Dropdown } from "primereact/dropdown";
 
 export default function Clientes() {
   const emptyClient: Cliente = {
@@ -54,7 +58,6 @@ export default function Clientes() {
     queryFn: getAllClientes,
   });
 
-  console.log(clients);
   const openNew = () => {
     setClient(emptyClient);
     setSubmitted(false);
@@ -74,37 +77,26 @@ export default function Clientes() {
     setDeleteClientsDialog(false);
   };
 
-  const saveClient = () => {
-    setSubmitted(true);
-
-    if (client.nombre_apellido.trim()) {
-      let _clients = [...(clients || [])];
-      let _client = { ...client };
-
-      if (client.id_cliente) {
-        const index = findIndexById(client.id_cliente);
-        _clients[index] = _client;
-        toast.current?.show({
-          severity: "success",
-          summary: "Successful",
-          detail: "Cliente actualizado",
-          life: 3000,
-        });
-      } else {
-        _client.id_cliente = Date.now();
-        _clients.push(_client);
-        toast.current?.show({
-          severity: "success",
-          summary: "Successful",
-          detail: "Cliente creado",
-          life: 3000,
-        });
-      }
-
-      setClients(_clients);
+  const queryClient = useQueryClient();
+  //aca se realiza el post del cliente.
+  const mutation = useMutation({
+    mutationFn: postCliente,
+    onSuccess: async () => {
+      toast.current?.show({
+        severity: "success",
+        summary: "Successful",
+        detail: "Cliente creado",
+        life: 3000,
+      });
+      queryClient.invalidateQueries({ queryKey: ["clientes"] });
       setClientDialog(false);
       setClient(emptyClient);
-    }
+    },
+  });
+  const saveClient = () => {
+    setSubmitted(true);
+    console.log("btn guardar", client);
+    mutation.mutate(client);
   };
 
   const editClient = (client: Cliente) => {
@@ -217,209 +209,282 @@ export default function Clientes() {
     </>
   );
 
+
   return (
-    <div>
-      <Toast ref={toast} />
-      <div className="p-3 bg-gray-100 text-center rounded-lg shadow-md">
-        <h1 className="text-3xl font-semibold text-gray-800">Clientes</h1>
-      </div>
-      <br />
-      <div className="card">
-        <Toolbar
-          className="mb-4"
-          left={() => (
-            <div className="flex flex-wrap gap-2">
-              <Button
-                label="+ Nuevo Cliente"
-                icon="pi pi-plus"
-                severity="info"
-                onClick={openNew}
-              />
-              
-            </div>
-          )}
-          right={() => (
-            <Button
-              label="Excel"
-              icon="pi pi-upload"
-              severity="success"
-              onClick={exportCSV}
+    <>
+      {isPending ? (
+        <SyncLoader />
+      ) : (
+        <div>
+          <Toast ref={toast} />
+          <div className="p-3 bg-gray-100 text-center rounded-lg shadow-md">
+            <h1 className="text-3xl font-semibold text-gray-800">Clientes</h1>
+          </div>
+          <br />
+          <div className="card">
+            <Toolbar
+              className="mb-4"
+              left={() => (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    label="+ Nuevo Cliente"
+                    icon="pi pi-plus"
+                    severity="info"
+                    onClick={openNew}
+                  />
+                </div>
+              )}
+              right={() => (
+                <Button
+                  label="Excel"
+                  icon="pi pi-upload"
+                  severity="success"
+                  onClick={exportCSV}
+                />
+              )}
             />
-          )}
-        />
 
-        <DataTable
-          ref={dt}
-          value={clients || []}
-          selection={selectedClients}
-          dataKey="id_cliente"
-          paginator
-          rows={5}
-          globalFilter={globalFilter}
-          header={header}
-        >
-          {/* <Column selectionMode="multiple" exportable={false} /> */}
-          <Column field="nombre_apellido" header="Nombre y Apellido" sortable />
-          <Column field="ruc" header="RUC" />
-          <Column field="ci" header="CI" />
-          <Column field="nro_tel" header="Teléfono" />
-          <Column field="correo" header="Correo" />
-          <Column field="direccion" header="Dirección" />
-          <Column field="estado" header="Estado" hidden />
-          <Column
-            header="Acción"
-            body={(rowData: Cliente) => (
-              <>
-                <Button
-                  icon={<SquarePen />}
-                  rounded
-                  outlined
-                  className="mr-3"
-                  onClick={() => editClient(rowData)}
-                />
+            <DataTable
+              ref={dt}
+              value={clients || []}
+              selection={selectedClients}
+              dataKey="id_cliente"
+              paginator
+              rows={5}
+              globalFilter={globalFilter}
+              header={header}
+            >
+              <Column
+                field="nombre_apellido"
+                header="Nombre y Apellido"
+                sortable
+              />
+              <Column field="ruc" header="RUC" />
+              <Column field="ci" header="CI" />
+              <Column field="nro_tel" header="Teléfono" />
+              <Column field="correo" header="Correo" />
+              <Column field="direccion" header="Dirección" />
+              <Column field="estado" header="Estado" hidden />
+              <Column
+                header="Acción"
+                body={(rowData: Cliente) => (
+                  <>
+                    <Button
+                      icon={<SquarePen />}
+                      rounded
+                      outlined
+                      className="mr-3"
+                      onClick={() => editClient(rowData)}
+                    />
 
-                <Button
-                  icon={<Trash2 />}
-                  rounded
-                  outlined
-                  severity="danger"
-                  onClick={() => confirmDeleteClient(rowData)}
-                />
-              </>
-            )}
-            exportable={false}
-          />
-        </DataTable>
-      </div>
+                    <Button
+                      icon={<Trash2 />}
+                      rounded
+                      outlined
+                      severity="danger"
+                      onClick={() => confirmDeleteClient(rowData)}
+                    />
+                  </>
+                )}
+                exportable={false}
+              />
+            </DataTable>
+          </div>
 
-      <Dialog
-        visible={clientDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Datos del Cliente"
-        modal
-        className="p-fluid"
-        footer={clientDialogFooter}
-        onHide={hideDialog}
-      >
-        <div className="field">
-          <label htmlFor="nombre_apellido" className="font-bold">
-            Nombre y Apellido
-          </label>
-          <InputText
-            id="nombre_apellido"
-            value={client.nombre_apellido}
-            onChange={(e) =>
-              setClient({ ...client, nombre_apellido: e.target.value })
-            }
-            required
-            autoFocus
-            className={classNames({
-              "p-invalid": submitted && !client.nombre_apellido,
-            })}
-          />
-          {submitted && !client.nombre_apellido && (
-            <small className="p-error">El nombre es obligatorio.</small>
-          )}
-        </div>
-        <div className="field">
-          <label htmlFor="ruc" className="font-bold">
-            RUC
-          </label>
-          <InputText
-            id="ruc"
-            value={client.ruc}
-            onChange={(e) => setClient({ ...client, ruc: e.target.value })}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="ci" className="font-bold">
-            CI
-          </label>
-          <InputText
-            id="ci"
-            value={client.ci}
-            onChange={(e) => setClient({ ...client, ci: e.target.value })}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="nro_tel" className="font-bold">
-            Teléfono
-          </label>
-          <InputText
-            id="nro_tel"
-            value={client.nro_tel}
-            onChange={(e) => setClient({ ...client, nro_tel: e.target.value })}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="direccion" className="font-bold">
-            Dirección
-          </label>
-          <InputText
-            id="direccion"
-            value={client.direccion}
-            onChange={(e) =>
-              setClient({ ...client, direccion: e.target.value })
-            }
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="correo" className="font-bold">
-            Correo
-          </label>
-          <InputText
-            id="correo"
-            value={client.correo}
-            onChange={(e) => setClient({ ...client, correo: e.target.value })}
-          />
-        </div>
-      </Dialog>
+          <Dialog
+            visible={clientDialog}
+            style={{ width: "32rem" }}
+            breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+            header="Datos del Cliente"
+            modal
+            className="p-fluid"
+            footer={clientDialogFooter}
+            onHide={hideDialog}
+          >
+            <div className="field">
+              <label htmlFor="nombre_apellido" className="font-bold">
+                Nombre y Apellido
+              </label>
+              <InputText
+                id="nombre_apellido"
+                value={client.nombre_apellido}
+                onChange={(e) =>
+                  setClient({ ...client, nombre_apellido: e.target.value })
+                }
+                required
+                autoFocus
+                className={classNames({
+                  "p-invalid": submitted && !client.nombre_apellido,
+                })}
+              />
+              {submitted && !client.nombre_apellido && (
+                <small className="p-error">El nombre es obligatorio.</small>
+              )}
 
-      <Dialog
-        visible={deleteClientDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Confirmar"
-        modal
-        footer={deleteClientDialogFooter}
-        onHide={hideDeleteClientDialog}
-      >
-        <div className="confirmation-content">
-          <i
-            className="pi pi-exclamation-triangle mr-3"
-            style={{ fontSize: "2rem" }}
-          />
-          {client && (
-            <span>
-              ¿Estás seguro que deseas eliminar a{" "}
-              <b>{client.nombre_apellido}</b>?
-            </span>
-          )}
-        </div>
-      </Dialog>
+              <label htmlFor="id_mascota" className="font-bold">
+                Mascotas
+              </label>
+              <Dropdown
+                id="id_mascota"
+                value={client.id_mascota}
+                options={[
+                  { label: "Mascota 1", value: 1 },
+                  { label: "Mascota 2", value: 2 },
+                  // Agrega aquí las opciones reales de mascotas
+                ]}
+                onChange={(e) =>
+                  setClient({ ...client, id_mascota: e.value })
+                }
+                required
+                className={classNames({
+                  "p-invalid": submitted && !client.id_mascota,
+                })}
+              />
+              {submitted && !client.id_mascota && (
+                <small className="p-error">El nombre es obligatorio.</small>
+              )}
+            </div>
+            <div className="field">
+              <label htmlFor="ruc" className="font-bold">
+                RUC
+              </label>
+              <InputText
+                id="ruc"
+                value={client.ruc}
+                onChange={(e) => setClient({ ...client, ruc: e.target.value })}
+                required
+                className={classNames({
+                  "p-invalid": submitted && !client.ruc,
+                })}
+              />
+              {submitted && !client.ruc && (
+                <small className="p-error">El ruc es obligatorio.</small>
+              )}
+            </div>
+            <div className="field">
+              <label htmlFor="ci" className="font-bold">
+                CI
+              </label>
+              <InputText
+                id="ci"
+                required
+                value={client.ci}
+                onChange={(e) => setClient({ ...client, ci: e.target.value })}
+                className={classNames({
+                  "p-invalid": submitted && !client.ci,
+                })}
+              />
+              {submitted && !client.ci && (
+                <small className="p-error">El ci es obligatorio.</small>
+              )}
+            </div>
+            <div className="field">
+              <label htmlFor="nro_tel" className="font-bold">
+                Teléfono
+              </label>
+              <InputText
+                id="nro_tel"
+                value={client.nro_tel}
+                required
+                onChange={(e) =>
+                  setClient({ ...client, nro_tel: e.target.value })
+                }
+                className={classNames({
+                  "p-invalid": submitted && !client.nro_tel,
+                })}
+              />
+              {submitted && !client.nro_tel && (
+                <small className="p-error">
+                  El Nro de telelefono es obligatorio.
+                </small>
+              )}
+            </div>
+            <div className="field">
+              <label htmlFor="direccion" className="font-bold">
+                Dirección
+              </label>
+              <InputText
+                id="direccion"
+                value={client.direccion}
+                required
+                onChange={(e) =>
+                  setClient({ ...client, direccion: e.target.value })
+                }
+                className={classNames({
+                  "p-invalid": submitted && !client.direccion,
+                })}
+              />
+              {submitted && !client.direccion && (
+                <small className="p-error">La direccion es obligatorio.</small>
+              )}
+            </div>
+            <div className="field">
+              <label htmlFor="correo" className="font-bold">
+                Correo
+              </label>
+              <InputText
+                id="correo"
+                value={client.correo}
+                required
+                onChange={(e) =>
+                  setClient({ ...client, correo: e.target.value })
+                }
+                className={classNames({
+                  "p-invalid": submitted && !client.ruc,
+                })}
+              />
+              {submitted && !client.correo && (
+                <small className="p-error">El correo es obligatorio.</small>
+              )}
+            </div>
+          </Dialog>
 
-      <Dialog
-        visible={deleteClientsDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Confirmar"
-        modal
-        footer={deleteClientsDialogFooter}
-        onHide={hideDeleteClientsDialog}
-      >
-        <div className="confirmation-content">
-          <i
-            className="pi pi-exclamation-triangle mr-3"
-            style={{ fontSize: "2rem" }}
-          />
-          {client && (
-            <span>
-              ¿Estás seguro que deseas eliminar los clientes seleccionados?
-            </span>
-          )}
+          <Dialog
+            visible={deleteClientDialog}
+            style={{ width: "32rem" }}
+            breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+            header="Confirmar"
+            modal
+            footer={deleteClientDialogFooter}
+            onHide={hideDeleteClientDialog}
+          >
+            <div className="confirmation-content">
+              <i
+                className="pi pi-exclamation-triangle mr-3"
+                style={{ fontSize: "2rem" }}
+              />
+              {client && (
+                <span>
+                  ¿Estás seguro que deseas eliminar a{" "}
+                  <b>{client.nombre_apellido}</b>?
+                </span>
+              )}
+            </div>
+          </Dialog>
+
+          <Dialog
+            visible={deleteClientsDialog}
+            style={{ width: "32rem" }}
+            breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+            header="Confirmar"
+            modal
+            footer={deleteClientsDialogFooter}
+            onHide={hideDeleteClientsDialog}
+          >
+            <div className="confirmation-content">
+              <i
+                className="pi pi-exclamation-triangle mr-3"
+                style={{ fontSize: "2rem" }}
+              />
+              {client && (
+                <span>
+                  ¿Estás seguro que deseas eliminar los clientes seleccionados?
+                </span>
+              )}
+            </div>
+          </Dialog>
         </div>
-      </Dialog>
-    </div>
+      )}
+    </>
   );
 }

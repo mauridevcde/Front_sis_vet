@@ -1,7 +1,7 @@
 "use client";
 import "./globals.css";
 
-import "~lucide-static/font/Lucide.css";
+
 
 export default function Example() {
   return (
