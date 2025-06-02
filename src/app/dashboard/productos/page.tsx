@@ -1,0 +1,524 @@
+"use client";
+import React, { useRef, useState } from "react";
+import "primereact/resources/themes/lara-light-indigo/theme.css";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Toast } from "primereact/toast";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { Toolbar } from "primereact/toolbar";
+import { InputText } from "primereact/inputtext";
+import { Dialog } from "primereact/dialog";
+import { Button } from "primereact/button";
+import { Producto } from "../../interfaces/productos.interface";
+import { getAllProductos } from "@/app/_api/productos/getAllProductos";
+import { postProducto } from "@/app/_api/productos/postProductos";
+import { putProducto } from "@/app/_api/productos/putProductos";
+import { deleteProducto } from "@/app/_api/productos/deleteProductos";
+import { SyncLoader } from "react-spinners";
+import { SquarePen, Trash2 } from "lucide-react";
+
+const emptyProducto: Producto = {
+  id_producto: 0,
+  nombre: "",
+  fecha_vencimiento: "",
+  id_proveedor: 0,
+  stock: 0,
+  precio_compra: 0,
+  precio_venta: 0,
+  unidad_medida: "",
+  imagen: "",
+  estado: 1,
+  TipoDeVenta: "Contado",
+  iva: 0,
+  id_usuario: 0,
+  codigoDeBarra: "",
+};
+
+export default function Productos() {
+  const [producto, setProducto] = useState<Producto>(emptyProducto);
+  const [productoDialog, setProductoDialog] = useState(false);
+  const [deleteProductoDialog, setDeleteProductoDialog] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [globalFilter, setGlobalFilter] = useState<string | null>(null);
+  const [selectedProductos, setSelectedProductos] = useState<Producto[] | null>(
+    null
+  );
+  const toast = useRef<Toast>(null);
+  const dt = useRef<DataTable<Producto[]>>(null);
+
+  const queryClient = useQueryClient();
+
+  const { data: productos = [], isPending } = useQuery({
+    queryKey: ["productos"],
+    queryFn: getAllProductos,
+  });
+
+  const mutationNewProducto = useMutation({
+    mutationFn: postProducto,
+    onSuccess: () => {
+      toast.current?.show({
+        severity: "success",
+        summary: "Éxito",
+        detail: "Producto creado",
+        life: 3000,
+      });
+      queryClient.invalidateQueries({ queryKey: ["productos"] });
+      setProductoDialog(false);
+      setProducto(emptyProducto);
+    },
+    onError: (error: any) => {
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: error.message,
+        life: 3000,
+      });
+    },
+  });
+
+  const mutationUpdateProducto = useMutation({
+    mutationFn: putProducto,
+    onSuccess: () => {
+      toast.current?.show({
+        severity: "success",
+        summary: "Actualizado",
+        detail: "Producto actualizado",
+        life: 3000,
+      });
+      queryClient.invalidateQueries({ queryKey: ["productos"] });
+      setProductoDialog(false);
+    },
+    onError: (error: any) => {
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: error.message,
+        life: 3000,
+      });
+    },
+  });
+
+  const mutationDeleteProducto = useMutation({
+    mutationFn: deleteProducto,
+    onSuccess: () => {
+      toast.current?.show({
+        severity: "success",
+        summary: "Eliminado",
+        detail: "Producto eliminado",
+        life: 3000,
+      });
+      queryClient.invalidateQueries({ queryKey: ["productos"] });
+    },
+    onError: (error: any) => {
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: error.message,
+        life: 3000,
+      });
+    },
+  });
+
+  const saveProducto = () => {
+    setSubmitted(true);
+    if (producto.nombre.trim()) {
+      if (producto.id_producto !== 0) {
+        mutationUpdateProducto.mutate(producto);
+      } else {
+        mutationNewProducto.mutate(producto);
+      }
+    }
+  };
+
+  const openNew = () => {
+    setProducto(emptyProducto);
+    setSubmitted(false);
+    setProductoDialog(true);
+  };
+
+  const hideDialog = () => {
+    setSubmitted(false);
+    setProductoDialog(false);
+  };
+
+  const editProducto = (prod: Producto) => {
+    setProducto({ ...prod });
+    setProductoDialog(true);
+  };
+
+  const confirmDeleteProducto = (prod: Producto) => {
+    setProducto(prod);
+    setDeleteProductoDialog(true);
+  };
+
+  const deleteProductoConfirmado = () => {
+    setDeleteProductoDialog(false);
+    mutationDeleteProducto.mutate(producto);
+  };
+
+  const imageBodyTemplate = (rowData: any) => {
+    return (
+      <img
+        src={`${rowData.imagen}`}
+        alt={rowData.imagen}
+        className="shadow-2 border-round"
+        style={{ width: "40px", height: "40px", objectFit: "cover" }}
+      />
+    );
+  };
+
+  const header = (
+    <div className="flex flex-wrap gap-1 align-items-center justify-content-between text-xs">
+      <h4 className="m-0 text-xs">Gestionar Productos</h4>
+      <InputText
+        type="search"
+        onInput={(e) => setGlobalFilter((e.target as HTMLInputElement).value)}
+        placeholder="Buscar..."
+        className="p-inputtext-sm text-xs"
+        style={{ width: "120px" }}
+      />
+    </div>
+  );
+
+  return (
+    <>
+      {isPending ? (
+        <SyncLoader size={8} />
+      ) : (
+        <div>
+          <Toast ref={toast} />
+          <div className="p-2 bg-gray-100 text-center rounded shadow text-xs">
+            <h1 className="text-base font-semibold text-gray-800">Productos</h1>
+          </div>
+          <div className="card mt-2">
+            <Toolbar
+              className="mb-2 text-xs"
+              left={() => (
+                <Button
+                  label="+ Nuevo Producto"
+              
+                  severity="info"
+                  size="small"
+                  className="text-xs p-2"
+                  onClick={openNew}
+                />
+              )}
+              right={() => (
+                <Button
+                  label="Excel"
+                  icon="pi pi-upload"
+                  severity="success"
+                  size="small"
+                  className="text-xs p-2"
+                  onClick={() => dt.current?.exportCSV()}
+                />
+              )}
+            />
+
+            <DataTable
+              ref={dt}
+              size="small"
+              className="text-xs"
+              value={productos || []}
+              selection={selectedProductos}
+              dataKey="id_producto"
+              paginator
+              rows={5}
+              globalFilter={globalFilter}
+              sortField="id_producto"
+              sortOrder={-1}
+              header={header}
+              
+            >
+              <Column field="id_producto" header="Id" sortable />
+              <Column field="nombre" header="Producto" sortable />
+
+              <Column field="precio_compra" header="Precio. Compra" />
+              <Column field="precio_venta" header="Precio. Venta" />
+
+              <Column
+                field="imagen"
+                body={imageBodyTemplate}
+                header="Imgagen"
+              />
+
+              <Column field="fecha_vencimiento" header="Vencimiento." />
+              <Column field="stock" header="stock." />
+              <Column
+                header="Acción"
+                body={(rowData: Producto) => (
+                  <>
+                    <Button
+                      icon={<SquarePen size={16} />}
+                      rounded
+                      outlined
+                      size="normal"
+                      className="mr-1 p-2 text-xs"
+                      onClick={() => editProducto(rowData)}
+                    />
+                    <Button
+                      icon={<Trash2 size={16} />}
+                      rounded
+                      outlined
+                      severity="danger"
+                      size="small"
+                      className="p-2 text-xs"
+                      onClick={() => confirmDeleteProducto(rowData)}
+                    />
+                  </>
+                )}
+                exportable={false}
+                className="text-xs"
+              />
+            </DataTable>
+          </div>
+
+          <Dialog
+            visible={productoDialog}
+            style={{ width: "22rem" }}
+            header="Detalles del Producto"
+            modal
+            className="p-fluid text-xs"
+            onHide={hideDialog}
+            footer={
+              <>
+                <Button
+                  label="Cancelar"
+                  icon="pi pi-times"
+                  onClick={hideDialog}
+                  size="small"
+                  className="text-xs p-2"
+                />
+                <Button
+                  label="Guardar"
+                  icon="pi pi-check"
+                  onClick={saveProducto}
+                  size="small"
+                  className="text-xs p-2"
+                />
+              </>
+            }
+          >
+            <div className="field mb-2">
+              <label htmlFor="nombre" className="text-xs">
+                Nombre
+              </label>
+              <InputText
+                id="nombre"
+                value={producto.nombre}
+                onChange={(e) =>
+                  setProducto({ ...producto, nombre: e.target.value })
+                }
+                required
+                autoFocus
+                className="p-inputtext-sm text-xs"
+              />
+            </div>
+            <div className="field mb-2">
+              <label htmlFor="fecha_vencimiento" className="text-xs">
+                Fecha de Vencimiento
+              </label>
+              <InputText
+                id="fecha_vencimiento"
+                value={producto.fecha_vencimiento}
+                onChange={(e) =>
+                  setProducto({
+                    ...producto,
+                    fecha_vencimiento: e.target.value,
+                  })
+                }
+                className="p-inputtext-sm text-xs"
+              />
+            </div>
+            <div className="field mb-2">
+              <label htmlFor="id_proveedor" className="text-xs">
+                ID Proveedor
+              </label>
+              <InputText
+                id="id_proveedor"
+                value={producto.id_proveedor}
+                onChange={(e) =>
+                  setProducto({
+                    ...producto,
+                    id_proveedor: Number(e.target.value),
+                  })
+                }
+                className="p-inputtext-sm text-xs"
+              />
+            </div>
+            <div className="field mb-2">
+              <label htmlFor="stock" className="text-xs">
+                Stock
+              </label>
+              <InputText
+                id="stock"
+                value={producto.stock}
+                onChange={(e) =>
+                  setProducto({ ...producto, stock: Number(e.target.value) })
+                }
+                className="p-inputtext-sm text-xs"
+              />
+            </div>
+            <div className="field mb-2">
+              <label htmlFor="precio_compra" className="text-xs">
+                Precio Compra
+              </label>
+              <InputText
+                id="precio_compra"
+                value={producto.precio_compra}
+                onChange={(e) =>
+                  setProducto({
+                    ...producto,
+                    precio_compra: Number(e.target.value),
+                  })
+                }
+                className="p-inputtext-sm text-xs"
+              />
+            </div>
+            <div className="field mb-2">
+              <label htmlFor="precio_venta" className="text-xs">
+                Precio Venta
+              </label>
+              <InputText
+                id="precio_venta"
+                value={producto.precio_venta}
+                onChange={(e) =>
+                  setProducto({
+                    ...producto,
+                    precio_venta: Number(e.target.value),
+                  })
+                }
+                className="p-inputtext-sm text-xs"
+              />
+            </div>
+            <div className="field mb-2">
+              <label htmlFor="unidad_medida" className="text-xs">
+                Unidad de Medida
+              </label>
+              <InputText
+                id="unidad_medida"
+                value={producto.unidad_medida}
+                onChange={(e) =>
+                  setProducto({ ...producto, unidad_medida: e.target.value })
+                }
+                className="p-inputtext-sm text-xs"
+              />
+            </div>
+            <div className="field mb-2">
+              <label htmlFor="imagen" className="text-xs">
+                Imagen (URL)
+              </label>
+              <InputText
+                id="imagen"
+                value={producto.imagen}
+                onChange={(e) =>
+                  setProducto({ ...producto, imagen: e.target.value })
+                }
+                className="p-inputtext-sm text-xs"
+              />
+            </div>
+            <div className="field mb-2">
+              <label htmlFor="estado" className="text-xs">
+                Estado
+              </label>
+              <InputText
+                id="estado"
+                value={producto.estado}
+                onChange={(e) =>
+                  setProducto({ ...producto, estado: Number(e.target.value) })
+                }
+                className="p-inputtext-sm text-xs"
+              />
+            </div>
+            <div className="field mb-2">
+              <label htmlFor="TipoDeVenta" className="text-xs">
+                Tipo de Venta
+              </label>
+              <InputText
+                id="TipoDeVenta"
+                value={producto.TipoDeVenta}
+                onChange={(e) =>
+                  setProducto({ ...producto, TipoDeVenta: e.target.value })
+                }
+                className="p-inputtext-sm text-xs"
+              />
+            </div>
+            <div className="field mb-2">
+              <label htmlFor="iva" className="text-xs">
+                IVA
+              </label>
+              <InputText
+                id="iva"
+                value={producto.iva}
+                onChange={(e) =>
+                  setProducto({ ...producto, iva: Number(e.target.value) })
+                }
+                className="p-inputtext-sm text-xs"
+              />
+            </div>
+            <div className="field mb-2">
+              <label htmlFor="id_usuario" className="text-xs">
+                ID Usuario
+              </label>
+              <InputText
+                id="id_usuario"
+                value={producto.id_usuario}
+                onChange={(e) =>
+                  setProducto({
+                    ...producto,
+                    id_usuario: Number(e.target.value),
+                  })
+                }
+                className="p-inputtext-sm text-xs"
+              />
+            </div>
+            <div className="field mb-2">
+              <label htmlFor="codigoDeBarra" className="text-xs">
+                Código de Barra
+              </label>
+              <InputText
+                id="codigoDeBarra"
+                value={producto.codigoDeBarra}
+                onChange={(e) =>
+                  setProducto({ ...producto, codigoDeBarra: e.target.value })
+                }
+                className="p-inputtext-sm text-xs"
+              />
+            </div>
+          </Dialog>
+
+          <Dialog
+            visible={deleteProductoDialog}
+            style={{ width: "18rem" }}
+            header="Confirmar Eliminación"
+            modal
+            className="text-xs"
+            onHide={() => setDeleteProductoDialog(false)}
+            footer={
+              <>
+                <Button
+                  label="No"
+                  icon="pi pi-times"
+                  onClick={() => setDeleteProductoDialog(false)}
+                  size="small"
+                  className="text-xs p-2"
+                />
+                <Button
+                  label="Sí"
+                  icon="pi pi-check"
+                  onClick={deleteProductoConfirmado}
+                  size="small"
+                  className="text-xs p-2"
+                />
+              </>
+            }
+          >
+            <p className="text-xs">
+              ¿Deseas eliminar el producto <strong>{producto.nombre}</strong>?
+            </p>
+          </Dialog>
+        </div>
+      )}
+    </>
+  );
+}
