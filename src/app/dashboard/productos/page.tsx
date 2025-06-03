@@ -15,7 +15,10 @@ import { postProducto } from "@/app/_api/productos/postProductos";
 import { putProducto } from "@/app/_api/productos/putProductos";
 import { deleteProducto } from "@/app/_api/productos/deleteProductos";
 import { SyncLoader } from "react-spinners";
-import { SquarePen, Trash2 } from "lucide-react";
+import { Search, SquarePen, Trash2 } from "lucide-react";
+import { getAllProveedores } from "@/app/_api/proveedores/getAllProveedores";
+import { InputNumber } from "primereact/inputnumber";
+import { Calendar } from "primereact/calendar";
 
 const emptyProducto: Producto = {
   id_producto: 0,
@@ -40,9 +43,13 @@ export default function Productos() {
   const [deleteProductoDialog, setDeleteProductoDialog] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState<string | null>(null);
+  const [datetimeFechaVencimiento, setDateTimeFechaVencimiento] =
+    useState(null);
   const [selectedProductos, setSelectedProductos] = useState<Producto[] | null>(
     null
   );
+  const [proveedorModal, setProveedorModal] = useState(false);
+  const [selectedProveedor, setSelectedProveedor] = useState(null);
   const toast = useRef<Toast>(null);
   const dt = useRef<DataTable<Producto[]>>(null);
 
@@ -52,6 +59,13 @@ export default function Productos() {
     queryKey: ["productos"],
     queryFn: getAllProductos,
   });
+
+  const { data: proveedores = [], isPending: isPendigDataProovedor } = useQuery(
+    {
+      queryKey: ["proveedor"],
+      queryFn: getAllProveedores,
+    }
+  );
 
   const mutationNewProducto = useMutation({
     mutationFn: postProducto,
@@ -166,7 +180,28 @@ export default function Productos() {
       />
     );
   };
+  const onRowSelectProv = (event: any) => {
+    setProducto({
+      ...producto,
+      id_proveedor: Number(event.data.id_proveedor),
+    });
+    setProveedorModal(false);
+    toast.current?.show({
+      severity: "info",
+      summary: "Proveedor Seleccionado!",
+      detail: `Nombre: ${event.data.descripcion}`,
+      life: 3000,
+    });
+  };
 
+  const onRowUnselectProv = (event: any) => {
+    toast.current?.show({
+      severity: "warn",
+      summary: "Proveedor Desmarcado!",
+      detail: `Nombre: ${event.data.descripcion}`,
+      life: 3000,
+    });
+  };
   const header = (
     <div className="flex flex-wrap gap-1 align-items-center justify-content-between text-xs">
       <h4 className="m-0 text-xs">Gestionar Productos</h4>
@@ -196,7 +231,6 @@ export default function Productos() {
               left={() => (
                 <Button
                   label="+ Nuevo Producto"
-              
                   severity="info"
                   size="small"
                   className="text-xs p-2"
@@ -228,19 +262,12 @@ export default function Productos() {
               sortField="id_producto"
               sortOrder={-1}
               header={header}
-              
             >
               <Column field="id_producto" header="Id" sortable />
               <Column field="nombre" header="Producto" sortable />
-
               <Column field="precio_compra" header="Precio. Compra" />
               <Column field="precio_venta" header="Precio. Venta" />
-
-              <Column
-                field="imagen"
-                body={imageBodyTemplate}
-                header="Imgagen"
-              />
+              <Column field="imagen" body={imageBodyTemplate} header="Imagen" />
 
               <Column field="fecha_vencimiento" header="Vencimiento." />
               <Column field="stock" header="stock." />
@@ -273,6 +300,49 @@ export default function Productos() {
             </DataTable>
           </div>
 
+          {/* modal proveedor */}
+
+          <Dialog
+            header="Selecciona el Proveedor"
+            visible={proveedorModal}
+            style={{ width: "50vw" }}
+            onHide={() => {
+              if (!proveedorModal) return;
+              setProveedorModal(false);
+            }}
+            footer={
+              <>
+                <Button
+                  className="bg-bluegray-600"
+                  label="Cancelar"
+                  icon="pi
+                  pi-times"
+                  onClick={() => setProveedorModal(false)}
+                  size="small"
+                  rounded
+                  severity="danger"
+                ></Button>
+              </>
+            }
+          >
+            <DataTable
+              value={proveedores}
+              selectionMode="single"
+              selection={selectedProveedor}
+              onSelectionChange={(e) => setSelectedProveedor(e.value)}
+              dataKey="id_proveedor"
+              onRowSelect={onRowSelectProv}
+              onRowUnselect={onRowUnselectProv}
+              metaKeySelection={false}
+              tableStyle={{ minWidth: "50rem" }}
+            >
+              <Column field="id_proveedor" header="ID"></Column>
+              <Column field="razon_social" header="Razón Social"></Column>
+              <Column field="ruc" header="RUC"></Column>
+            </DataTable>
+          </Dialog>
+          {/* fin modal proveedor */}
+
           <Dialog
             visible={productoDialog}
             style={{ width: "22rem" }}
@@ -287,6 +357,7 @@ export default function Productos() {
                   icon="pi pi-times"
                   onClick={hideDialog}
                   size="small"
+                  severity="danger"
                   className="text-xs p-2"
                 />
                 <Button
@@ -294,6 +365,7 @@ export default function Productos() {
                   icon="pi pi-check"
                   onClick={saveProducto}
                   size="small"
+                  severity="info"
                   className="text-xs p-2"
                 />
               </>
@@ -318,34 +390,35 @@ export default function Productos() {
               <label htmlFor="fecha_vencimiento" className="text-xs">
                 Fecha de Vencimiento
               </label>
-              <InputText
+              <Calendar
                 id="fecha_vencimiento"
                 value={producto.fecha_vencimiento}
-                onChange={(e) =>
-                  setProducto({
-                    ...producto,
-                    fecha_vencimiento: e.target.value,
-                  })
-                }
-                className="p-inputtext-sm text-xs"
+                onChange={(e) => setDateTimeFechaVencimiento(e.value)}
+                showTime
+                hourFormat="24"
               />
+            
             </div>
+
             <div className="field mb-2">
               <label htmlFor="id_proveedor" className="text-xs">
-                ID Proveedor
+                Proveedor
               </label>
-              <InputText
-                id="id_proveedor"
-                value={producto.id_proveedor}
-                onChange={(e) =>
-                  setProducto({
-                    ...producto,
-                    id_proveedor: Number(e.target.value),
-                  })
-                }
-                className="p-inputtext-sm text-xs"
-              />
+              <div className="p-inputgroup flex-1">
+                <InputText
+                  id="id_proveedor"
+                  value={producto.id_proveedor}
+                  disabled
+                  placeholder="Busca el proveedor"
+                />
+                <Button
+                  onClick={() => setProveedorModal(true)}
+                  icon=<Search />
+                  className="p-button-warning"
+                />
+              </div>
             </div>
+
             <div className="field mb-2">
               <label htmlFor="stock" className="text-xs">
                 Stock
@@ -363,10 +436,10 @@ export default function Productos() {
               <label htmlFor="precio_compra" className="text-xs">
                 Precio Compra
               </label>
-              <InputText
+              <InputNumber
                 id="precio_compra"
-                value={producto.precio_compra}
-                onChange={(e) =>
+                value={Number(producto.precio_compra)}
+                onValueChange={(e) =>
                   setProducto({
                     ...producto,
                     precio_compra: Number(e.target.value),
@@ -379,10 +452,10 @@ export default function Productos() {
               <label htmlFor="precio_venta" className="text-xs">
                 Precio Venta
               </label>
-              <InputText
+              <InputNumber
                 id="precio_venta"
-                value={producto.precio_venta}
-                onChange={(e) =>
+                value={Number(producto.precio_venta)}
+                onValueChange={(e) =>
                   setProducto({
                     ...producto,
                     precio_venta: Number(e.target.value),
