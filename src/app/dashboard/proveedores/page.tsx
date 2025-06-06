@@ -3,8 +3,8 @@
 // getAllProveedores, postProveedor, putProveedor, deleteProveedores
 
 "use client";
-import React, { useState, useRef } from "react";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
+import React, { useState, useRef } from "react";
 import { classNames } from "primereact/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllProveedores } from "@/app/_api/proveedores/getAllProveedores";
@@ -37,13 +37,19 @@ export default function Proveedores() {
   const [proveedorDialog, setProveedorDialog] = useState(false);
   const [deleteProveedorDialog, setDeleteProveedorDialog] = useState(false);
   const [proveedor, setProveedor] = useState<Proveedor>(emptyProveedor);
-  const [selectedProveedores, setSelectedProveedores] = useState<Proveedor[] | null>(null);
+  const [selectedProveedores, setSelectedProveedores] = useState<
+    Proveedor[] | null
+  >(null);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState<string | null>(null);
   const toast = useRef<Toast>(null);
   const dt = useRef<DataTable<Proveedor[]>>(null);
 
-  const { data: proveedores = [], isPending, isError } = useQuery({
+  const {
+    data: proveedores = [],
+    isPending,
+    isError,
+  } = useQuery({
     queryKey: ["allproveedores"],
     queryFn: getAllProveedores,
   });
@@ -176,6 +182,12 @@ export default function Proveedores() {
           type="search"
           onInput={(e) => setGlobalFilter((e.target as HTMLInputElement).value)}
           placeholder="Buscar..."
+          style={{
+            fontSize: "12px",
+            height: "40px",
+            width: "200px",
+            padding: "0px 6px",
+          }}
         />
       </IconField>
     </div>
@@ -183,15 +195,30 @@ export default function Proveedores() {
 
   const proveedorDialogFooter = (
     <>
-      <Button label="Cancelar" icon="pi pi-times" outlined onClick={hideDialog} />
+      <Button
+        label="Cancelar"
+        icon="pi pi-times"
+        outlined
+        onClick={hideDialog}
+      />
       <Button label="Guardar" icon="pi pi-check" onClick={saveProveedor} />
     </>
   );
 
   const deleteProveedorDialogFooter = (
     <>
-      <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteProveedorDialog} />
-      <Button label="Sí" icon="pi pi-check" severity="danger" onClick={deleteProveedor} />
+      <Button
+        label="No"
+        icon="pi pi-times"
+        outlined
+        onClick={hideDeleteProveedorDialog}
+      />
+      <Button
+        label="Sí"
+        icon="pi pi-check"
+        severity="danger"
+        onClick={deleteProveedor}
+      />
     </>
   );
 
@@ -203,16 +230,24 @@ export default function Proveedores() {
         <div>
           <Toast ref={toast} />
 
-          <div className="p-3 bg-gray-100 text-center rounded-lg shadow-md">
-            <h1 className="text-3xl font-semibold text-gray-800">Proveedores</h1>
+          <div className="p-1 mb-2 bg-gray-100 text-center rounded-lg shadow-md">
+            <h1 className="m-0 text-md font-semibold text-gray-800">
+              Proveedores
+            </h1>
           </div>
-          <br />
+
           <div className="card">
             <Toolbar
-              className="mb-4"
+              className="mb-1 "
               left={() => (
-                <div className="flex flex-wrap gap-2">
-                  <Button label="+ Nuevo Proveedor" icon="pi pi-plus" severity="info" onClick={openNew} />
+                <div className="flex flex-wrap gap-1">
+                  <Button
+                    label="+ Nuevo Proveedor"
+                    style={{ fontSize: "12px" }}
+                    icon="pi pi-plus"
+                    severity="info"
+                    onClick={openNew}
+                  />
                 </div>
               )}
             />
@@ -226,6 +261,7 @@ export default function Proveedores() {
               rows={5}
               globalFilter={globalFilter}
               header={header}
+              style={{ fontSize: "14px" }}
             >
               <Column field="descripcion" header="Descripción" sortable />
               <Column field="razon_social" header="Razón Social" />
@@ -235,8 +271,36 @@ export default function Proveedores() {
                 header="Acción"
                 body={(rowData: Proveedor) => (
                   <>
-                    <Button icon={<SquarePen />} rounded outlined className="mr-3" title="editar" onClick={() => editProveedor(rowData)} />
-                    <Button icon={<Trash2 />} rounded outlined severity="danger" title="eliminar" onClick={() => confirmDeleteProveedor(rowData)} />
+                    <Button
+                      icon={<SquarePen />}
+                      rounded
+                      outlined
+                      className="mr-3"
+                      title="editar"
+                      onClick={() => editProveedor(rowData)}
+                      style={{
+                        fontSize: "10px",
+                        height: "40px",
+                        width: "40px",
+                        padding: "2px",
+                        marginRight: "4px",
+                      }}
+                    />
+                    <Button
+                      icon={<Trash2 />}
+                      rounded
+                      outlined
+                      severity="danger"
+                      title="eliminar"
+                      onClick={() => confirmDeleteProveedor(rowData)}
+                      style={{
+                        fontSize: "10px",
+                        height: "40px",
+                        width: "40px",
+                        padding: "2px",
+                        marginRight: "4px",
+                      }}
+                    />
                   </>
                 )}
                 exportable={false}
@@ -261,11 +325,19 @@ export default function Proveedores() {
               <InputText
                 id="descripcion"
                 value={proveedor.descripcion}
-                onChange={(e) => setProveedor({ ...proveedor, descripcion: e.target.value })}
+                onChange={(e) =>
+                  setProveedor({ ...proveedor, descripcion: e.target.value })
+                }
                 required
-                className={classNames({ "p-invalid": submitted && !proveedor.descripcion })}
+                className={classNames({
+                  "p-invalid": submitted && !proveedor.descripcion,
+                })}
               />
-              {submitted && !proveedor.descripcion && <small className="p-error">La descripción es obligatoria.</small>}
+              {submitted && !proveedor.descripcion && (
+                <small className="p-error">
+                  La descripción es obligatoria.
+                </small>
+              )}
             </div>
             <div className="field">
               <label htmlFor="razon_social" className="font-bold">
@@ -274,11 +346,19 @@ export default function Proveedores() {
               <InputText
                 id="razon_social"
                 value={proveedor.razon_social}
-                onChange={(e) => setProveedor({ ...proveedor, razon_social: e.target.value })}
+                onChange={(e) =>
+                  setProveedor({ ...proveedor, razon_social: e.target.value })
+                }
                 required
-                className={classNames({ "p-invalid": submitted && !proveedor.razon_social })}
+                className={classNames({
+                  "p-invalid": submitted && !proveedor.razon_social,
+                })}
               />
-              {submitted && !proveedor.razon_social && <small className="p-error">La razón social es obligatoria.</small>}
+              {submitted && !proveedor.razon_social && (
+                <small className="p-error">
+                  La razón social es obligatoria.
+                </small>
+              )}
             </div>
             <div className="field">
               <label htmlFor="ruc" className="font-bold">
@@ -287,11 +367,17 @@ export default function Proveedores() {
               <InputText
                 id="ruc"
                 value={proveedor.ruc}
-                onChange={(e) => setProveedor({ ...proveedor, ruc: e.target.value })}
+                onChange={(e) =>
+                  setProveedor({ ...proveedor, ruc: e.target.value })
+                }
                 required
-                className={classNames({ "p-invalid": submitted && !proveedor.ruc })}
+                className={classNames({
+                  "p-invalid": submitted && !proveedor.ruc,
+                })}
               />
-              {submitted && !proveedor.ruc && <small className="p-error">El RUC es obligatorio.</small>}
+              {submitted && !proveedor.ruc && (
+                <small className="p-error">El RUC es obligatorio.</small>
+              )}
             </div>
             <div className="field">
               <label htmlFor="direccion" className="font-bold">
@@ -300,11 +386,17 @@ export default function Proveedores() {
               <InputText
                 id="direccion"
                 value={proveedor.direccion}
-                onChange={(e) => setProveedor({ ...proveedor, direccion: e.target.value })}
+                onChange={(e) =>
+                  setProveedor({ ...proveedor, direccion: e.target.value })
+                }
                 required
-                className={classNames({ "p-invalid": submitted && !proveedor.direccion })}
+                className={classNames({
+                  "p-invalid": submitted && !proveedor.direccion,
+                })}
               />
-              {submitted && !proveedor.direccion && <small className="p-error">La dirección es obligatoria.</small>}
+              {submitted && !proveedor.direccion && (
+                <small className="p-error">La dirección es obligatoria.</small>
+              )}
             </div>
           </Dialog>
 
@@ -318,8 +410,16 @@ export default function Proveedores() {
             onHide={hideDeleteProveedorDialog}
           >
             <div className="confirmation-content">
-              <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: "2rem" }} />
-              {proveedor && <span>¿Estás seguro que deseas eliminar a <b>{proveedor.descripcion}</b>?</span>}
+              <i
+                className="pi pi-exclamation-triangle mr-3"
+                style={{ fontSize: "2rem" }}
+              />
+              {proveedor && (
+                <span>
+                  ¿Estás seguro que deseas eliminar a{" "}
+                  <b>{proveedor.descripcion}</b>?
+                </span>
+              )}
             </div>
           </Dialog>
         </div>

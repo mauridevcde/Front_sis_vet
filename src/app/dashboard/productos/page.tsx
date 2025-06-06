@@ -314,6 +314,7 @@ export default function Productos() {
               sortField="id_producto"
               sortOrder={-1}
               header={header}
+               style={{ fontSize: "14px" }}
             >
               <Column field="id_producto" header="Id" sortable />
               <Column field="nombre" header="Producto" sortable />
@@ -338,6 +339,13 @@ export default function Productos() {
                       size="small"
                       className="mr-1 p-2 text-xs"
                       onClick={() => editProducto(rowData)}
+                      style={{
+                        fontSize: "10px",
+                        height: "40px",
+                        width: "40px",
+                        padding: "2px",
+                        marginRight: "4px",
+                      }}
                     />
                     <Button
                       icon={<Trash2 size={16} />}
@@ -347,6 +355,13 @@ export default function Productos() {
                       size="small"
                       className="p-2 text-xs"
                       onClick={() => confirmDeleteProducto(rowData)}
+                      style={{
+                        fontSize: "10px",
+                        height: "40px",
+                        width: "40px",
+                        padding: "2px",
+                        marginRight: "4px",
+                      }}
                     />
                   </>
                 )}
@@ -390,7 +405,7 @@ export default function Productos() {
               onRowSelect={onRowSelectProv}
               onRowUnselect={onRowUnselectProv}
               metaKeySelection={false}
-              tableStyle={{ minWidth: "50rem" }}
+              tableStyle={{ minWidth: "50rem", fontSize: "10px" }}
             >
               <Column field="id_proveedor" header="ID"></Column>
               <Column field="razon_social" header="Razón Social"></Column>
@@ -633,10 +648,7 @@ export default function Productos() {
               setVisibleImagenProducto(false);
             }}
           >
-            <img
-              src={imgProd}
-             className="w-100 object-cover"
-            ></img>
+            <img src={imgProd} className="w-100 object-cover"></img>
           </Dialog>
         </div>
       )}

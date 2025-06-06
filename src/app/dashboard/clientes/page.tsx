@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useRef } from "react";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
+import React, { useState, useRef } from "react";
 import { classNames } from "primereact/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllClientes } from "@/app/_api/clientes/getAllClientes";
@@ -205,6 +205,12 @@ export default function Clientes() {
           type="search"
           onInput={(e) => setGlobalFilter((e.target as HTMLInputElement).value)}
           placeholder="Buscar..."
+          style={{
+            fontSize: "12px",
+            height: "40px",
+            width: "200px",
+            padding: "0px 6px",
+          }}
         />
       </IconField>
     </div>
@@ -253,19 +259,22 @@ export default function Clientes() {
           <Toast ref={toast} />
           {/* motal de mascotas */}
 
-          <div className="p-3 bg-gray-100 text-center rounded-lg shadow-md">
-            <h1 className="text-3xl font-semibold text-gray-800">Clientes</h1>
+          <div className="p-2 mb-2 bg-gray-100 text-center rounded-lg shadow-md">
+            <h1 className="m-0 text-md font-semibold text-gray-800">
+              Clientes
+            </h1>
           </div>
-          <br />
+
           <div className="card">
             <Toolbar
-              className="mb-4"
+              className="mb-2"
               left={() => (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1">
                   <Button
                     label="+ Nuevo Cliente"
                     icon="pi pi-plus"
                     severity="info"
+                    style={{ fontSize: "14px" }}
                     onClick={openNew}
                   />
                 </div>
@@ -292,6 +301,7 @@ export default function Clientes() {
               rows={5}
               globalFilter={globalFilter}
               header={header}
+              style={{ fontSize: "14px" }}
             >
               <Column
                 field="nombre_apellido"
@@ -315,6 +325,13 @@ export default function Clientes() {
                       outlined
                       className="mr-3"
                       onClick={() => editClient(rowData)}
+                      style={{
+                        fontSize: "10px",
+                        height: "40px",
+                        width: "40px",
+                        padding: "2px",
+                        marginRight: "4px",
+                      }}
                     />
 
                     <Button
@@ -323,6 +340,13 @@ export default function Clientes() {
                       outlined
                       severity="danger"
                       onClick={() => confirmDeleteClient(rowData)}
+                      style={{
+                        fontSize: "10px",
+                        height: "40px",
+                        width: "40px",
+                        padding: "2px",
+                        marginRight: "4px",
+                      }}
                     />
                   </>
                 )}
