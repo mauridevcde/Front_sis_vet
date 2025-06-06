@@ -19,25 +19,34 @@ import { Search, SquarePen, Trash2 } from "lucide-react";
 import { getAllProveedores } from "@/app/_api/proveedores/getAllProveedores";
 import { InputNumber } from "primereact/inputnumber";
 import { Calendar } from "primereact/calendar";
+import { useAuthStore } from "@/app/_store/authStore";
+import { formatToLocalSqlDatetime } from "@/app/utils/utils";
 
-const emptyProducto: Producto = {
-  id_producto: 0,
-  nombre: "",
-  fecha_vencimiento: "",
-  id_proveedor: 0,
-  stock: 0,
-  precio_compra: 0,
-  precio_venta: 0,
-  unidad_medida: "",
-  imagen: "",
-  estado: 1,
-  TipoDeVenta: "Contado",
-  iva: 0,
-  id_usuario: 0,
-  codigoDeBarra: "",
-};
-
+interface AuthStore {
+  nombre_apellido: string;
+  id_usuario: number;
+  id_rol: number;
+}
 export default function Productos() {
+  const { id_usuario: IDusuarioParaPost } = useAuthStore() as AuthStore;
+
+  const emptyProducto: Producto = {
+    id_producto: 0,
+    nombre: "",
+    fecha_vencimiento: "",
+    id_proveedor: 0,
+    stock: 0,
+    precio_compra: 0,
+    precio_venta: 0,
+    unidad_medida: "",
+    imagen: "",
+    estado: 1,
+    TipoDeVenta: "Contado",
+    iva: 0,
+    id_usuario: 0,
+    codigoDeBarra: "",
+  };
+
   const [producto, setProducto] = useState<Producto>(emptyProducto);
   const [productoDialog, setProductoDialog] = useState(false);
   const [deleteProductoDialog, setDeleteProductoDialog] = useState(false);
@@ -135,11 +144,25 @@ export default function Productos() {
 
   const saveProducto = () => {
     setSubmitted(true);
+    //
+    console.log("Id_usuario: ", IDusuarioParaPost);
+    const productoToEdit = {
+      ...producto,
+      id_usuario: IDusuarioParaPost,
+      fecha_vencimiento: datetimeFechaVencimiento
+        ? formatToLocalSqlDatetime(datetimeFechaVencimiento)
+        : "",
+    };
+
+    const productoToPost = {
+      ...producto,
+      id_usuario: IDusuarioParaPost,
+    };
     if (producto.nombre.trim()) {
       if (producto.id_producto !== 0) {
-        mutationUpdateProducto.mutate(producto);
+        mutationUpdateProducto.mutate(productoToEdit);
       } else {
-        mutationNewProducto.mutate(producto);
+        mutationNewProducto.mutate(productoToPost);
       }
     }
   };
@@ -148,6 +171,7 @@ export default function Productos() {
     setProducto(emptyProducto);
     setSubmitted(false);
     setProductoDialog(true);
+    setDateTimeFechaVencimiento(null);
   };
 
   const hideDialog = () => {
@@ -157,6 +181,9 @@ export default function Productos() {
 
   const editProducto = (prod: Producto) => {
     setProducto({ ...prod });
+    setDateTimeFechaVencimiento(
+      prod.fecha_vencimiento ? new Date(prod.fecha_vencimiento) : null
+    );
     setProductoDialog(true);
   };
 
@@ -176,7 +203,7 @@ export default function Productos() {
         src={`${rowData.imagen}`}
         alt={rowData.imagen}
         className="shadow-2 border-round"
-        style={{ width: "40px", height: "40px", objectFit: "cover" }}
+        style={{ width: "50px", height: "50px", objectFit: "cover" }}
       />
     );
   };
@@ -214,6 +241,24 @@ export default function Productos() {
       />
     </div>
   );
+
+  const replaceFilterDate = (rowData: any) => {
+    const date = new Date(rowData.fecha_vencimiento);
+
+    const representative = date.toLocaleString("es-PY", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false, // Para formato de 24 horas
+    });
+
+    return (
+      <div className="flex align-items-center gap-2">{representative}</div>
+    );
+  };
 
   return (
     <>
@@ -269,7 +314,11 @@ export default function Productos() {
               <Column field="precio_venta" header="Precio. Venta" />
               <Column field="imagen" body={imageBodyTemplate} header="Imagen" />
 
-              <Column field="fecha_vencimiento" header="Vencimiento." />
+              <Column
+                field="fecha_vencimiento"
+                header="Vencimiento."
+                body={replaceFilterDate}
+              />
               <Column field="stock" header="stock." />
               <Column
                 header="Acción"
@@ -392,12 +441,17 @@ export default function Productos() {
               </label>
               <Calendar
                 id="fecha_vencimiento"
-                value={producto.fecha_vencimiento}
-                onChange={(e) => setDateTimeFechaVencimiento(e.value)}
+                value={datetimeFechaVencimiento}
+                onChange={(e) => {
+                  setDateTimeFechaVencimiento(e.value);
+                  setProducto({
+                    ...producto,
+                    fecha_vencimiento: formatToLocalSqlDatetime(e.value),
+                  });
+                }}
                 showTime
                 hourFormat="24"
               />
-            
             </div>
 
             <div className="field mb-2">
@@ -419,19 +473,6 @@ export default function Productos() {
               </div>
             </div>
 
-            <div className="field mb-2">
-              <label htmlFor="stock" className="text-xs">
-                Stock
-              </label>
-              <InputText
-                id="stock"
-                value={producto.stock}
-                onChange={(e) =>
-                  setProducto({ ...producto, stock: Number(e.target.value) })
-                }
-                className="p-inputtext-sm text-xs"
-              />
-            </div>
             <div className="field mb-2">
               <label htmlFor="precio_compra" className="text-xs">
                 Precio Compra
@@ -529,22 +570,7 @@ export default function Productos() {
                 className="p-inputtext-sm text-xs"
               />
             </div>
-            <div className="field mb-2">
-              <label htmlFor="id_usuario" className="text-xs">
-                ID Usuario
-              </label>
-              <InputText
-                id="id_usuario"
-                value={producto.id_usuario}
-                onChange={(e) =>
-                  setProducto({
-                    ...producto,
-                    id_usuario: Number(e.target.value),
-                  })
-                }
-                className="p-inputtext-sm text-xs"
-              />
-            </div>
+
             <div className="field mb-2">
               <label htmlFor="codigoDeBarra" className="text-xs">
                 Código de Barra
