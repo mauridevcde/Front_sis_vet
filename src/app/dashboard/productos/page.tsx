@@ -1,6 +1,6 @@
 "use client";
-import React, { useRef, useState } from "react";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
+import React, { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Toast } from "primereact/toast";
 import { DataTable } from "primereact/datatable";
@@ -396,6 +396,7 @@ export default function Productos() {
               </>
             }
           >
+            
             <DataTable
               value={proveedores}
               selectionMode="single"

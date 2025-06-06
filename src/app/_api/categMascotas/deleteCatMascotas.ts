@@ -1,4 +1,4 @@
-import { CategoriaMascota } from "@/app/interfaces/categMascotas";
+import { CategoriaMascota } from "@/app/interfaces/categMascotas.interface";
 import axios from "../axios";
 
 export const deleteCategoria = async (data: CategoriaMascota) => {

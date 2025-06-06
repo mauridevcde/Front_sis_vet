@@ -15,7 +15,7 @@ import { Trash2, SquarePen } from "lucide-react";
 import { SyncLoader } from "react-spinners";
 import { classNames } from "primereact/utils";
 
-import { CategoriaMascota } from "../../interfaces/categMascotas";
+import { CategoriaMascota } from "../../interfaces/categMascotas.interface";
 import { getAllCategorias } from "@/app/_api/categMascotas/getAllCatMascotas";
 import { postCategoria } from "@/app/_api/categMascotas/postCatMascotas";
 import { putCategoria } from "@/app/_api/categMascotas/putCatMascotas";

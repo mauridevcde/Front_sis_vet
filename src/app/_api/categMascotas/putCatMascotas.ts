@@ -1,5 +1,5 @@
 // services/putCliente.ts
-import { CategoriaMascota } from "@/app/interfaces/categMascotas";
+import { CategoriaMascota } from "@/app/interfaces/categMascotas.interface";
 import axios from "../axios";
 
 export const putCategoria = async (data: CategoriaMascota) => {
