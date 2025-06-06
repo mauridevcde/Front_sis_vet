@@ -48,7 +48,9 @@ export default function Productos() {
   };
 
   const [producto, setProducto] = useState<Producto>(emptyProducto);
+  const [imgProd, setImgProducto] = useState("");
   const [productoDialog, setProductoDialog] = useState(false);
+  const [visibleImagenProducto, setVisibleImagenProducto] = useState(false);
   const [deleteProductoDialog, setDeleteProductoDialog] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [globalFilter, setGlobalFilter] = useState<string | null>(null);
@@ -200,6 +202,11 @@ export default function Productos() {
   const imageBodyTemplate = (rowData: any) => {
     return (
       <img
+        onClick={() => {
+          setImgProducto("");
+          setVisibleImagenProducto(true);
+          setImgProducto(rowData.imagen);
+        }}
         src={`${rowData.imagen}`}
         alt={rowData.imagen}
         className="shadow-2 border-round"
@@ -328,7 +335,7 @@ export default function Productos() {
                       icon={<SquarePen size={16} />}
                       rounded
                       outlined
-                      size="normal"
+                      size="small"
                       className="mr-1 p-2 text-xs"
                       onClick={() => editProducto(rowData)}
                     />
@@ -615,6 +622,21 @@ export default function Productos() {
             <p className="text-xs">
               ¿Deseas eliminar el producto <strong>{producto.nombre}</strong>?
             </p>
+          </Dialog>
+          {/* modal para ver imagen del producto */}
+          <Dialog
+            header="Imagen del producto"
+            visible={visibleImagenProducto}
+            style={{ width: "50vw" }}
+            onHide={() => {
+              if (!visibleImagenProducto) return;
+              setVisibleImagenProducto(false);
+            }}
+          >
+            <img
+              src={imgProd}
+             className="w-100 object-cover"
+            ></img>
           </Dialog>
         </div>
       )}
