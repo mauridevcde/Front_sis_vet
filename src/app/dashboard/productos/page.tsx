@@ -269,38 +269,37 @@ export default function Productos() {
 
   return (
     <>
-      {isPending ? (
-        <SyncLoader size={8} />
-      ) : (
-        <div>
-          <Toast ref={toast} />
-          <div className="p-2 bg-gray-100 text-center rounded shadow text-xs">
-            <h1 className="text-base font-semibold text-gray-800">Productos</h1>
-          </div>
-          <div className="card mt-2">
-            <Toolbar
-              className="mb-2 text-xs"
-              left={() => (
-                <Button
-                  label="+ Nuevo Producto"
-                  severity="info"
-                  size="small"
-                  className="text-xs p-2"
-                  onClick={openNew}
-                />
-              )}
-              right={() => (
-                <Button
-                  label="Excel"
-                  icon="pi pi-upload"
-                  severity="success"
-                  size="small"
-                  className="text-xs p-2"
-                  onClick={() => dt.current?.exportCSV()}
-                />
-              )}
-            />
-
+      <div>
+        <Toast ref={toast} />
+        <div className="p-2 bg-gray-100 text-center rounded shadow text-xs">
+          <h1 className="text-base font-semibold text-gray-800">Productos</h1>
+        </div>
+        <div className="card mt-2">
+          <Toolbar
+            className="mb-2 text-xs"
+            left={() => (
+              <Button
+                label="+ Nuevo Producto"
+                severity="info"
+                size="small"
+                className="text-xs p-2"
+                onClick={openNew}
+              />
+            )}
+            right={() => (
+              <Button
+                label="Excel"
+                icon="pi pi-upload"
+                severity="success"
+                size="small"
+                className="text-xs p-2"
+                onClick={() => dt.current?.exportCSV()}
+              />
+            )}
+          />
+          {isPending ? (
+            <SyncLoader size={8} />
+          ) : (
             <DataTable
               ref={dt}
               size="small"
@@ -314,7 +313,7 @@ export default function Productos() {
               sortField="id_producto"
               sortOrder={-1}
               header={header}
-               style={{ fontSize: "14px" }}
+              style={{ fontSize: "14px" }}
             >
               <Column field="id_producto" header="Id" sortable />
               <Column field="nombre" header="Producto" sortable />
@@ -369,290 +368,289 @@ export default function Productos() {
                 className="text-xs"
               />
             </DataTable>
+          )}
+        </div>
+
+        {/* modal proveedor */}
+
+        <Dialog
+          header="Selecciona el Proveedor"
+          visible={proveedorModal}
+          style={{ width: "50vw" }}
+          onHide={() => {
+            if (!proveedorModal) return;
+            setProveedorModal(false);
+          }}
+          footer={
+            <>
+              <Button
+                className="bg-bluegray-600"
+                label="Cancelar"
+                icon="pi
+                  pi-times"
+                onClick={() => setProveedorModal(false)}
+                size="small"
+                rounded
+                severity="danger"
+              ></Button>
+            </>
+          }
+        >
+          <DataTable
+            value={proveedores}
+            selectionMode="single"
+            selection={selectedProveedor}
+            onSelectionChange={(e) => setSelectedProveedor(e.value)}
+            dataKey="id_proveedor"
+            onRowSelect={onRowSelectProv}
+            onRowUnselect={onRowUnselectProv}
+            metaKeySelection={false}
+            tableStyle={{ minWidth: "50rem", fontSize: "10px" }}
+          >
+            <Column field="id_proveedor" header="ID"></Column>
+            <Column field="razon_social" header="Razón Social"></Column>
+            <Column field="ruc" header="RUC"></Column>
+          </DataTable>
+        </Dialog>
+        {/* fin modal proveedor */}
+
+        <Dialog
+          visible={productoDialog}
+          style={{ width: "22rem" }}
+          header="Detalles del Producto"
+          modal
+          className="p-fluid text-xs"
+          onHide={hideDialog}
+          footer={
+            <>
+              <Button
+                label="Cancelar"
+                icon="pi pi-times"
+                onClick={hideDialog}
+                size="small"
+                severity="danger"
+                className="text-xs p-2"
+              />
+              <Button
+                label="Guardar"
+                icon="pi pi-check"
+                onClick={saveProducto}
+                size="small"
+                severity="info"
+                className="text-xs p-2"
+              />
+            </>
+          }
+        >
+          <div className="field mb-2">
+            <label htmlFor="nombre" className="text-xs">
+              Nombre
+            </label>
+            <InputText
+              id="nombre"
+              value={producto.nombre}
+              onChange={(e) =>
+                setProducto({ ...producto, nombre: e.target.value })
+              }
+              required
+              autoFocus
+              className="p-inputtext-sm text-xs"
+            />
+          </div>
+          <div className="field mb-2">
+            <label htmlFor="fecha_vencimiento" className="text-xs">
+              Fecha de Vencimiento
+            </label>
+            <Calendar
+              id="fecha_vencimiento"
+              value={datetimeFechaVencimiento}
+              onChange={(e) => {
+                setDateTimeFechaVencimiento(e.value);
+                setProducto({
+                  ...producto,
+                  fecha_vencimiento: formatToLocalSqlDatetime(e.value),
+                });
+              }}
+              showTime
+              hourFormat="24"
+            />
           </div>
 
-          {/* modal proveedor */}
+          <div className="field mb-2">
+            <label htmlFor="id_proveedor" className="text-xs">
+              Proveedor
+            </label>
+            <div className="p-inputgroup flex-1">
+              <InputText
+                id="id_proveedor"
+                value={producto.id_proveedor}
+                disabled
+                placeholder="Busca el proveedor"
+              />
+              <Button
+                onClick={() => setProveedorModal(true)}
+                icon=<Search />
+                className="p-button-warning"
+              />
+            </div>
+          </div>
 
-          <Dialog
-            header="Selecciona el Proveedor"
-            visible={proveedorModal}
-            style={{ width: "50vw" }}
-            onHide={() => {
-              if (!proveedorModal) return;
-              setProveedorModal(false);
-            }}
-            footer={
-              <>
-                <Button
-                  className="bg-bluegray-600"
-                  label="Cancelar"
-                  icon="pi
-                  pi-times"
-                  onClick={() => setProveedorModal(false)}
-                  size="small"
-                  rounded
-                  severity="danger"
-                ></Button>
-              </>
-            }
-          >
-            
-            <DataTable
-              value={proveedores}
-              selectionMode="single"
-              selection={selectedProveedor}
-              onSelectionChange={(e) => setSelectedProveedor(e.value)}
-              dataKey="id_proveedor"
-              onRowSelect={onRowSelectProv}
-              onRowUnselect={onRowUnselectProv}
-              metaKeySelection={false}
-              tableStyle={{ minWidth: "50rem", fontSize: "10px" }}
-            >
-              <Column field="id_proveedor" header="ID"></Column>
-              <Column field="razon_social" header="Razón Social"></Column>
-              <Column field="ruc" header="RUC"></Column>
-            </DataTable>
-          </Dialog>
-          {/* fin modal proveedor */}
+          <div className="field mb-2">
+            <label htmlFor="precio_compra" className="text-xs">
+              Precio Compra
+            </label>
+            <InputNumber
+              id="precio_compra"
+              value={Number(producto.precio_compra)}
+              onValueChange={(e) =>
+                setProducto({
+                  ...producto,
+                  precio_compra: Number(e.target.value),
+                })
+              }
+              className="p-inputtext-sm text-xs"
+            />
+          </div>
+          <div className="field mb-2">
+            <label htmlFor="precio_venta" className="text-xs">
+              Precio Venta
+            </label>
+            <InputNumber
+              id="precio_venta"
+              value={Number(producto.precio_venta)}
+              onValueChange={(e) =>
+                setProducto({
+                  ...producto,
+                  precio_venta: Number(e.target.value),
+                })
+              }
+              className="p-inputtext-sm text-xs"
+            />
+          </div>
+          <div className="field mb-2">
+            <label htmlFor="unidad_medida" className="text-xs">
+              Unidad de Medida
+            </label>
+            <InputText
+              id="unidad_medida"
+              value={producto.unidad_medida}
+              onChange={(e) =>
+                setProducto({ ...producto, unidad_medida: e.target.value })
+              }
+              className="p-inputtext-sm text-xs"
+            />
+          </div>
+          <div className="field mb-2">
+            <label htmlFor="imagen" className="text-xs">
+              Imagen (URL)
+            </label>
+            <InputText
+              id="imagen"
+              value={producto.imagen}
+              onChange={(e) =>
+                setProducto({ ...producto, imagen: e.target.value })
+              }
+              className="p-inputtext-sm text-xs"
+            />
+          </div>
+          <div className="field mb-2">
+            <label htmlFor="estado" className="text-xs">
+              Estado
+            </label>
+            <InputText
+              id="estado"
+              value={producto.estado}
+              onChange={(e) =>
+                setProducto({ ...producto, estado: Number(e.target.value) })
+              }
+              className="p-inputtext-sm text-xs"
+            />
+          </div>
+          <div className="field mb-2">
+            <label htmlFor="TipoDeVenta" className="text-xs">
+              Tipo de Venta
+            </label>
+            <InputText
+              id="TipoDeVenta"
+              value={producto.TipoDeVenta}
+              onChange={(e) =>
+                setProducto({ ...producto, TipoDeVenta: e.target.value })
+              }
+              className="p-inputtext-sm text-xs"
+            />
+          </div>
+          <div className="field mb-2">
+            <label htmlFor="iva" className="text-xs">
+              IVA
+            </label>
+            <InputText
+              id="iva"
+              value={producto.iva}
+              onChange={(e) =>
+                setProducto({ ...producto, iva: Number(e.target.value) })
+              }
+              className="p-inputtext-sm text-xs"
+            />
+          </div>
 
-          <Dialog
-            visible={productoDialog}
-            style={{ width: "22rem" }}
-            header="Detalles del Producto"
-            modal
-            className="p-fluid text-xs"
-            onHide={hideDialog}
-            footer={
-              <>
-                <Button
-                  label="Cancelar"
-                  icon="pi pi-times"
-                  onClick={hideDialog}
-                  size="small"
-                  severity="danger"
-                  className="text-xs p-2"
-                />
-                <Button
-                  label="Guardar"
-                  icon="pi pi-check"
-                  onClick={saveProducto}
-                  size="small"
-                  severity="info"
-                  className="text-xs p-2"
-                />
-              </>
-            }
-          >
-            <div className="field mb-2">
-              <label htmlFor="nombre" className="text-xs">
-                Nombre
-              </label>
-              <InputText
-                id="nombre"
-                value={producto.nombre}
-                onChange={(e) =>
-                  setProducto({ ...producto, nombre: e.target.value })
-                }
-                required
-                autoFocus
-                className="p-inputtext-sm text-xs"
-              />
-            </div>
-            <div className="field mb-2">
-              <label htmlFor="fecha_vencimiento" className="text-xs">
-                Fecha de Vencimiento
-              </label>
-              <Calendar
-                id="fecha_vencimiento"
-                value={datetimeFechaVencimiento}
-                onChange={(e) => {
-                  setDateTimeFechaVencimiento(e.value);
-                  setProducto({
-                    ...producto,
-                    fecha_vencimiento: formatToLocalSqlDatetime(e.value),
-                  });
-                }}
-                showTime
-                hourFormat="24"
-              />
-            </div>
+          <div className="field mb-2">
+            <label htmlFor="codigoDeBarra" className="text-xs">
+              Código de Barra
+            </label>
+            <InputText
+              id="codigoDeBarra"
+              value={producto.codigoDeBarra}
+              onChange={(e) =>
+                setProducto({ ...producto, codigoDeBarra: e.target.value })
+              }
+              className="p-inputtext-sm text-xs"
+            />
+          </div>
+        </Dialog>
 
-            <div className="field mb-2">
-              <label htmlFor="id_proveedor" className="text-xs">
-                Proveedor
-              </label>
-              <div className="p-inputgroup flex-1">
-                <InputText
-                  id="id_proveedor"
-                  value={producto.id_proveedor}
-                  disabled
-                  placeholder="Busca el proveedor"
-                />
-                <Button
-                  onClick={() => setProveedorModal(true)}
-                  icon=<Search />
-                  className="p-button-warning"
-                />
-              </div>
-            </div>
-
-            <div className="field mb-2">
-              <label htmlFor="precio_compra" className="text-xs">
-                Precio Compra
-              </label>
-              <InputNumber
-                id="precio_compra"
-                value={Number(producto.precio_compra)}
-                onValueChange={(e) =>
-                  setProducto({
-                    ...producto,
-                    precio_compra: Number(e.target.value),
-                  })
-                }
-                className="p-inputtext-sm text-xs"
+        <Dialog
+          visible={deleteProductoDialog}
+          style={{ width: "18rem" }}
+          header="Confirmar Eliminación"
+          modal
+          className="text-xs"
+          onHide={() => setDeleteProductoDialog(false)}
+          footer={
+            <>
+              <Button
+                label="No"
+                icon="pi pi-times"
+                onClick={() => setDeleteProductoDialog(false)}
+                size="small"
+                className="text-xs p-2"
               />
-            </div>
-            <div className="field mb-2">
-              <label htmlFor="precio_venta" className="text-xs">
-                Precio Venta
-              </label>
-              <InputNumber
-                id="precio_venta"
-                value={Number(producto.precio_venta)}
-                onValueChange={(e) =>
-                  setProducto({
-                    ...producto,
-                    precio_venta: Number(e.target.value),
-                  })
-                }
-                className="p-inputtext-sm text-xs"
+              <Button
+                label="Sí"
+                icon="pi pi-check"
+                onClick={deleteProductoConfirmado}
+                size="small"
+                className="text-xs p-2"
               />
-            </div>
-            <div className="field mb-2">
-              <label htmlFor="unidad_medida" className="text-xs">
-                Unidad de Medida
-              </label>
-              <InputText
-                id="unidad_medida"
-                value={producto.unidad_medida}
-                onChange={(e) =>
-                  setProducto({ ...producto, unidad_medida: e.target.value })
-                }
-                className="p-inputtext-sm text-xs"
-              />
-            </div>
-            <div className="field mb-2">
-              <label htmlFor="imagen" className="text-xs">
-                Imagen (URL)
-              </label>
-              <InputText
-                id="imagen"
-                value={producto.imagen}
-                onChange={(e) =>
-                  setProducto({ ...producto, imagen: e.target.value })
-                }
-                className="p-inputtext-sm text-xs"
-              />
-            </div>
-            <div className="field mb-2">
-              <label htmlFor="estado" className="text-xs">
-                Estado
-              </label>
-              <InputText
-                id="estado"
-                value={producto.estado}
-                onChange={(e) =>
-                  setProducto({ ...producto, estado: Number(e.target.value) })
-                }
-                className="p-inputtext-sm text-xs"
-              />
-            </div>
-            <div className="field mb-2">
-              <label htmlFor="TipoDeVenta" className="text-xs">
-                Tipo de Venta
-              </label>
-              <InputText
-                id="TipoDeVenta"
-                value={producto.TipoDeVenta}
-                onChange={(e) =>
-                  setProducto({ ...producto, TipoDeVenta: e.target.value })
-                }
-                className="p-inputtext-sm text-xs"
-              />
-            </div>
-            <div className="field mb-2">
-              <label htmlFor="iva" className="text-xs">
-                IVA
-              </label>
-              <InputText
-                id="iva"
-                value={producto.iva}
-                onChange={(e) =>
-                  setProducto({ ...producto, iva: Number(e.target.value) })
-                }
-                className="p-inputtext-sm text-xs"
-              />
-            </div>
-
-            <div className="field mb-2">
-              <label htmlFor="codigoDeBarra" className="text-xs">
-                Código de Barra
-              </label>
-              <InputText
-                id="codigoDeBarra"
-                value={producto.codigoDeBarra}
-                onChange={(e) =>
-                  setProducto({ ...producto, codigoDeBarra: e.target.value })
-                }
-                className="p-inputtext-sm text-xs"
-              />
-            </div>
-          </Dialog>
-
-          <Dialog
-            visible={deleteProductoDialog}
-            style={{ width: "18rem" }}
-            header="Confirmar Eliminación"
-            modal
-            className="text-xs"
-            onHide={() => setDeleteProductoDialog(false)}
-            footer={
-              <>
-                <Button
-                  label="No"
-                  icon="pi pi-times"
-                  onClick={() => setDeleteProductoDialog(false)}
-                  size="small"
-                  className="text-xs p-2"
-                />
-                <Button
-                  label="Sí"
-                  icon="pi pi-check"
-                  onClick={deleteProductoConfirmado}
-                  size="small"
-                  className="text-xs p-2"
-                />
-              </>
-            }
-          >
-            <p className="text-xs">
-              ¿Deseas eliminar el producto <strong>{producto.nombre}</strong>?
-            </p>
-          </Dialog>
-          {/* modal para ver imagen del producto */}
-          <Dialog
-            header="Imagen del producto"
-            visible={visibleImagenProducto}
-            style={{ width: "50vw" }}
-            onHide={() => {
-              if (!visibleImagenProducto) return;
-              setVisibleImagenProducto(false);
-            }}
-          >
-            <img src={imgProd} className="w-100 object-cover"></img>
-          </Dialog>
-        </div>
-      )}
+            </>
+          }
+        >
+          <p className="text-xs">
+            ¿Deseas eliminar el producto <strong>{producto.nombre}</strong>?
+          </p>
+        </Dialog>
+        {/* modal para ver imagen del producto */}
+        <Dialog
+          header="Imagen del producto"
+          visible={visibleImagenProducto}
+          style={{ width: "50vw" }}
+          onHide={() => {
+            if (!visibleImagenProducto) return;
+            setVisibleImagenProducto(false);
+          }}
+        >
+          <img src={imgProd} className="w-100 object-cover"></img>
+        </Dialog>
+      </div>
     </>
   );
 }
