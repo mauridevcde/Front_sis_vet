@@ -15,30 +15,17 @@ import { putCirugia } from "@/app/_api/cirugias/putCirugias";
 import { deleteCirugia } from "@/app/_api/cirugias/deleteCirugias";
 import { getAllClientes } from "@/app/_api/clientes/getAllClientes";
 import { getAllVeterinarios } from "@/app/_api/veterinarios/getAllVeterinarios";
-import { useAuthStore } from "@/app/_store/authStore";
+
 import { Search, SquarePen, Trash2 } from "lucide-react";
-import { Dropdown } from "primereact/dropdown";
 
-interface Cirugia {
-  id_cirugia: number;
-  id_cliente: number;
-  fecha_cirugia: string | null;
-  tipo_cirugia: string | null;
-  observaciones: string | null;
-  id_veterinario: number;
-  estado: boolean | null;
-}
-
-interface AuthStore {
-  id_usuario: number;
-}
+import { Cirugia } from "@/app/interfaces/cirugias.interface";
+import { formatDateForInput, formatDateForMySQL } from "@/app/utils/utils";
 
 export default function Cirugias() {
-  const { id_usuario } = useAuthStore() as AuthStore;
   const emptyCirugia: Cirugia = {
     id_cirugia: 0,
     id_cliente: 0,
-    fecha_cirugia: null,
+    fecha_cirugia: new Date().toISOString().split("T")[0], // Formato yyyy-MM-dd,
     tipo_cirugia: null,
     observaciones: null,
     id_veterinario: 0,
@@ -55,8 +42,6 @@ export default function Cirugias() {
   );
   const [clienteModal, setClienteModal] = useState(false);
   const [veterinarioModal, setVeterinarioModal] = useState(false);
-  const [selectedCliente, setSelectedCliente] = useState(null);
-  const [selectedVeterinario, setSelectedVeterinario] = useState(null);
 
   const toast = useRef<Toast>(null);
   const dt = useRef<DataTable<Cirugia[]>>(null);
@@ -146,11 +131,17 @@ export default function Cirugias() {
 
   const saveCirugia = () => {
     setSubmitted(true);
+
     if (cirugia.tipo_cirugia?.trim()) {
+      const cirugiaToSave = {
+        ...cirugia,
+        fecha_cirugia: formatDateForMySQL(cirugia.fecha_cirugia),
+      };
+
       if (cirugia.id_cirugia !== 0) {
-        mutationUpdateCirugia.mutate(cirugia);
+        mutationUpdateCirugia.mutate(cirugiaToSave);
       } else {
-        mutationNewCirugia.mutate(cirugia);
+        mutationNewCirugia.mutate(cirugiaToSave);
       }
     }
   };
@@ -162,9 +153,10 @@ export default function Cirugias() {
   };
 
   const editCirugia = (cirugia: Cirugia) => {
-   // setCirugia({ ...cirugia });
-    setCirugia({ ...cirugia, fecha_cirugia: 'hello'})
-    console.log("ejecutando el editing: ", cirugia);
+    setCirugia({
+      ...cirugia,
+      fecha_cirugia: formatDateForInput(cirugia.fecha_cirugia),
+    });
 
     setCirugiaDialog(true);
   };
@@ -207,14 +199,15 @@ export default function Cirugias() {
 
     return date.toLocaleDateString();
   };
-  
-
-
 
   return (
     <>
       <Toast ref={toast} />
+      
       <div className="card">
+        <div className="p-2 mb-2 bg-gray-100 text-center rounded shadow text-xs">
+          <h1 className="text-base font-semibold text-gray-800">Cirugias</h1>
+        </div>
         <Toolbar
           className="mb-2"
           left={() => (
@@ -314,10 +307,13 @@ export default function Cirugias() {
           <InputText
             id="fecha_cirugia"
             type="date"
-            value={cirugia.fecha_cirugia || ""}
-            onChange={(e) =>
-              setCirugia({ ...cirugia, fecha_cirugia: e.target.value })
-            }
+            value={formatDateForInput(cirugia.fecha_cirugia)}
+            onChange={(e) => {
+              setCirugia({
+                ...cirugia,
+                fecha_cirugia: e.target.value, // Guardamos directamente en formato yyyy-MM-dd
+              });
+            }}
           />
         </div>
 

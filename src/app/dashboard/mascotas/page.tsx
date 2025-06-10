@@ -218,7 +218,7 @@ export default function Mascotas() {
     </div>
   );
 
-  const filterSexo = (rowData: any) => {
+  const filterSexo = (rowData: Mascota) => {
     return <>{rowData.sexo == 1 ? <div>Macho</div> : <div>Hembra</div>}</>;
   };
 
@@ -226,6 +226,9 @@ export default function Mascotas() {
     <>
       <Toast ref={toast} />
       <div className="card">
+        <div className="p-2 mb-2 bg-gray-100 text-center rounded shadow text-xs">
+          <h1 className="text-base font-semibold text-gray-800">Mascotas</h1>
+        </div>
         <Toolbar
           className="mb-2"
           left={() => (
