@@ -239,7 +239,7 @@ export default function DashboardLayout({
             </div>
           </div>
         </header>
-        <div className="flex mt-4 justify-center  gap-3 w-auto h-auto  p-2">
+        <div className="grid m-5 grid-cols-1 grid-rows-1 gap-4 justify-center">
           {children}
         </div>
       </main>
