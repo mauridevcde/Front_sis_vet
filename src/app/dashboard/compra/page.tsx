@@ -5,20 +5,21 @@ import { getAllProductos } from "@/app/_api/productos/getAllProductos";
 import ListadoProductos from "./_components/listadoProductos";
 
 export default function Compras() {
+  
   const { data: productos = [], isPending } = useQuery({
-    queryKey: ["productos2"],
+    queryKey: ["productos"],
     queryFn: getAllProductos,
   });
 
   return (
     <div className="@container ">
-      <div className="grid grid-cols-[60%_40%] grid-rows-[40px_100px_450px] gap-1">
-        <div className="col-span-2 h-full  rounded shadow">
-          Compra a Proveedor.
+      <div className="grid grid-cols-[60%_40%] grid-rows-[0px_100px_450px] ">
+        <div className="col-span-2 h-full  ">
+         
         </div>
 
         <div className="bg-red-500 h-full">Datos proveedor</div>
-        <div className=" row-span-2 row-start-2 h-full overflow-y-auto">
+        <div className=" row-span-2 row-start-2 h-full overflow-y-auto ">
           {isPending ? (
             "Cargando Productos..."
           ) : (
