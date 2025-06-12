@@ -1,166 +1,114 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
-import { Button } from "primereact/button";
-import { DataView, DataViewLayoutOptions } from "primereact/dataview";
-import { Rating } from "primereact/rating";
+
 import { Tag } from "primereact/tag";
-import { classNames } from "primereact/utils";
-import { Producto } from "@/app/interfaces/productos.interface";
-import { InputText } from "primereact/inputtext";
-import { Minus, Plus, ShoppingCart } from "lucide-react";
-import { Badge } from "primereact/badge";
 import { Card } from "primereact/card";
+import { Minus, Plus } from "lucide-react";
 
-export default function ListadoProductos({ producto }: Producto[]) {
-  console.log(producto);
-  const [quantity, setQuantity] = useState(1);
-  const [layout, setLayout] = useState("grid");
-
-  const getSeverity = (product) => {
-    switch (product.inventoryStatus) {
-      case "INSTOCK":
-        return "success";
-
-      case "LOWSTOCK":
-        return "warning";
-
-      case "OUTOFSTOCK":
-        return "danger";
-
-      default:
-        return null;
-    }
-  };
+export default function Listadoproductos({ producto }: producto) {
+  const [quantity, setQuantity] = useState(0);
 
   const increaseQuantity = () => {
-    if (quantity < product.stock) {
-      setQuantity(quantity + 1);
-    }
+    setQuantity(quantity + 1);
   };
 
   const decreaseQuantity = () => {
-    if (quantity > 1) {
+    if (quantity > 0) {
       setQuantity(quantity - 1);
     }
   };
 
-  const gridItem = (product: Producto) => {
-    return (
-      <div className="w-full max-w-sm mx-auto">
-        <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-          <div className="relative">
-            <img
-              src={product.image || "/placeholder.svg"}
-              alt={product.name}
-              className="w-full h-48 object-cover"
-            />
-            <Badge
-              variant={
-                product.stock > 10
-                  ? "default"
-                  : product.stock > 0
-                  ? "secondary"
-                  : "destructive"
-              }
-              className="absolute top-2 right-2"
-            >
-              {product.stock > 0 ? `Stock: ${product.stock}` : "Sin stock"}
-            </Badge>
-          </div>
-
-          <div className="p-4">
-            <h3 className="font-semibold text-lg mb-2 line-clamp-2 min-h-[3.5rem]">
-              {product.name}
-            </h3>
-
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-2xl font-bold text-primary">
-                ${product.price}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center border rounded-lg">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={decreaseQuantity}
-                  disabled={quantity <= 1}
-                  className="h-8 w-8 p-0 hover:bg-muted"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-
-                <span className="px-3 py-1 min-w-[2rem] text-center font-medium">
-                  {quantity}
-                </span>
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={increaseQuantity}
-                  disabled={quantity >= product.stock}
-                  className="h-8 w-8 p-0 hover:bg-muted"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <Button
-                size="sm"
-                disabled={product.stock === 0}
-                className="flex-1 ml-2"
-              >
-                <ShoppingCart className="h-4 w-4 mr-1" />
-                Agregar
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
+  const getStockSeverity = () => {
+    if (producto.stock === 0) return "danger";
+    if (producto.stock <= 5) return "warning";
+    return "success";
   };
 
-  const itemTemplate = (product, layout, index) => {
-    if (!product) {
-      return;
-    }
-
-    if (layout === "list") return listItem(product, index);
-    else if (layout === "grid") return gridItem(product);
-  };
-
-  const listTemplate = (products, layout) => {
-    return (
-      <div className=" grid grid-cols-3 gap-1.5  ">
-        {products.map((product, index) => itemTemplate(product, layout, index))}
-      </div>
-    );
-  };
-
-  const header = () => {
-    return (
-      <div className="flex justify-content-end  ">
-        <InputText
-          type="search"
-          onInput={(e) => ""}
-          placeholder="Buscar Producto"
-          className="p-inputtext-sm text-xs"
-          style={{ width: "300px" }}
+  const header = (
+    <div className="relative grid">
+      <img
+        src={producto.imagen || ""}
+        alt={producto.nombre}
+        className=" h-20 object-cover transition-transform duration-300 "
+      />
+      <div className="absolute top-1 right-1 grid">
+        <Tag
+          value={producto.stock > 0 ? `${producto.stock}` : "0"}
+          severity={getStockSeverity()}
+          className="!text-xs !px-1 !py-0.5"
         />
       </div>
-    );
-  };
+    </div>
+  );
+
+  const footer = (
+    <div className="grid gap-1 pt-0">
+      <div className="grid grid-cols-1">
+        <span className="text-sm font-bold text-black-600 justify-self-center mx-0 p-0">
+          {producto.precio_compra} Gs.
+        </span>
+      </div>
+
+      <div className="grid grid-cols-[auto_1fr] gap-2 items-center">
+        <div className="grid grid-cols-3 bg-gray-50 rounded border border-gray-200 overflow-hidden">
+          {/* Botón de disminuir (-) */}
+          <button
+            onClick={decreaseQuantity}
+            disabled={quantity <= 0}
+            className="!w-6 !h-6 !min-w-[2rem] !min-h-[2rem] !p-0 !bg-transparent !border-0 !text-gray-600 hover:!bg-gray-100 disabled:!text-gray-300 !rounded-none cursor-pointer flex items-center justify-center"
+          >
+            <i className="pi pi-minus" style={{ fontSize: "13px" }}></i>
+          </button>
+
+          {/* Input manual - Versión perfectamente integrada */}
+          <input
+            style={{fontSize: '10px', padding: '0px'}}
+            type="number"
+            min="1"
+            max={5000}
+            value={quantity}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "") {
+                setQuantity(1);
+              } else {
+                setQuantity(parseInt(value));
+              }
+            }}
+            onBlur={() => {
+              if (quantity < 1) setQuantity(1);
+            }}
+            className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-full px-2 py-1 bg-white border-x border-gray-200 text-sm font-semibold text-gray-800 text-center focus:outline-none"
+          />
+
+          {/* Botón de aumentar (+) */}
+          <button
+            onClick={increaseQuantity}
+            className="!w-8 !h-8 !min-w-[2rem] !min-h-[2rem] !p-0 !bg-transparent !border-0 !text-gray-600 hover:!bg-gray-100 disabled:!text-gray-300 !rounded-none cursor-pointer flex items-center justify-center"
+          >
+            <i className="pi pi-plus" style={{ fontSize: "13px" }}></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="card  ">
-      <DataView
-        value={producto}
-        listTemplate={listTemplate}
-        layout={layout}
-        header={header()}
-      />
+    <div className="w-full max-w-xs mx-auto grid">
+      <Card
+        header={header}
+        footer={footer}
+        className="p-0 !rounded-lg !shadow-md hover:!shadow-lg !transition-shadow !duration-300 !border-0 !overflow-hidden !bg-white"
+      >
+        {/* Ajusté el padding aquí */}
+        <h3 className="font-semibold text-xs text-gray-800 leading-tight overflow-hidden m-0">
+          {/* m-0 para quitar margen */}
+          <span className="block overflow-hidden text-ellipsis whitespace-wrap">
+            {producto.nombre}
+          </span>
+        </h3>
+      </Card>
     </div>
   );
 }
