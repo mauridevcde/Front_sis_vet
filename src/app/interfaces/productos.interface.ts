@@ -1,4 +1,5 @@
 export interface Producto {
+   cantidad?:  number | undefined; //esto no esta en la base de datos, es utilizado en la compra
   id_producto: number;
   nombre: string;
   fecha_vencimiento: string; // ISO format (e.g., "2022-04-12T04:00:00")

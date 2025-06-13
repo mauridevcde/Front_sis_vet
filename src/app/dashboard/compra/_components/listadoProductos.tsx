@@ -1,22 +1,33 @@
 "use client";
 import React, { useState } from "react";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
-
 import { Tag } from "primereact/tag";
 import { Card } from "primereact/card";
-import { Minus, Plus } from "lucide-react";
+import { Producto } from "@/app/interfaces/productos.interface";
+import { useCompraStore } from "../store/compraStore";
 
-export default function Listadoproductos({ producto }: producto) {
-  const [quantity, setQuantity] = useState(0);
+export default function Listadoproductos({ producto }: Producto) {
+  const productos = useCompraStore((state) => state.productos);
+  const setProductsDetails = useCompraStore((state) => state.addProducto); // Assuming your store has a setProductos action
+  const setRemoveDetails = useCompraStore((state) => state.removeProducto); // Assuming your store has a setProductos action
+  const setUpdateDetails = useCompraStore((state) => state.updateCantidad); // Assuming your store has a setProductos action
+  const setDecreaseDetails = useCompraStore((state) => state.decreaseProducto); // Assuming your store has a setProductos action
+  const productoEnCarrito = productos.find(
+    (p) => p.id_producto === producto.id_producto
+  );
+  const quantity = productoEnCarrito?.cantidad ?? 0;
 
-  const increaseQuantity = () => {
-    setQuantity(quantity + 1);
+  const increaseQuantity = (data: Producto) => {
+    setProductsDetails({ ...data });
   };
 
-  const decreaseQuantity = () => {
-    if (quantity > 0) {
-      setQuantity(quantity - 1);
-    }
+  const handleManualChange = (value: number) => {
+    const cantidad = Math.max(1, value);
+    setUpdateDetails(producto.id_producto, cantidad);
+  };
+
+  const decreaseQuantity = (product: Producto) => {
+    setDecreaseDetails(product.id_producto);
   };
 
   const getStockSeverity = () => {
@@ -54,7 +65,9 @@ export default function Listadoproductos({ producto }: producto) {
         <div className="grid grid-cols-3 bg-gray-50 rounded border border-gray-200 overflow-hidden">
           {/* Botón de disminuir (-) */}
           <button
-            onClick={decreaseQuantity}
+            onClick={() => {
+              decreaseQuantity(producto);
+            }}
             disabled={quantity <= 0}
             className="!w-6 !h-6 !min-w-[2rem] !min-h-[2rem] !p-0 !bg-transparent !border-0 !text-gray-600 hover:!bg-gray-100 disabled:!text-gray-300 !rounded-none cursor-pointer flex items-center justify-center"
           >
@@ -63,28 +76,26 @@ export default function Listadoproductos({ producto }: producto) {
 
           {/* Input manual - Versión perfectamente integrada */}
           <input
-            style={{fontSize: '10px', padding: '0px'}}
+            style={{ fontSize: "10px", padding: "0px" }}
             type="number"
-            min="1"
+            min="0"
             max={5000}
             value={quantity}
             onChange={(e) => {
-              const value = e.target.value;
-              if (value === "") {
-                setQuantity(1);
-              } else {
-                setQuantity(parseInt(value));
+              const value = parseInt(e.target.value);
+              if (!isNaN(value)) {
+                handleManualChange(value);
               }
             }}
             onBlur={() => {
-              if (quantity < 1) setQuantity(1);
+              if (quantity <= 1) handleManualChange(1);
             }}
             className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-full px-2 py-1 bg-white border-x border-gray-200 text-sm font-semibold text-gray-800 text-center focus:outline-none"
           />
 
           {/* Botón de aumentar (+) */}
           <button
-            onClick={increaseQuantity}
+            onClick={() => increaseQuantity({ ...producto })}
             className="!w-8 !h-8 !min-w-[2rem] !min-h-[2rem] !p-0 !bg-transparent !border-0 !text-gray-600 hover:!bg-gray-100 disabled:!text-gray-300 !rounded-none cursor-pointer flex items-center justify-center"
           >
             <i className="pi pi-plus" style={{ fontSize: "13px" }}></i>

@@ -8,8 +8,8 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { formatToLocalSqlDatetime } from "@/app/utils/utils";
 import { Search } from "lucide-react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
+
+import ListadoDetalles from "./_components/listadoDetalle";
 
 export default function Compras() {
   const [filtro, setFiltro] = useState("");
@@ -128,24 +128,10 @@ export default function Compras() {
             </div>
           </div>
 
-          <div className="bg-blue-900 row-span-2 col-start-2 row-start-2 h-[590px] min-h-[550px] mt-10">
-            <div className="flex w-[100] h-[70%] flex-wrap bg-amber-300">
-              <DataTable
-                value={productos}
-                // headerColumnGroup={headerGroup}
-                // footerColumnGroup={footerGroup}
-                size="small"
-                tableStyle={{ minWidth: "200px", maxWidth: "200px", width:"200px", fontSize: "10px"}}
-              >
-                <Column field="id_producto" />
-                <Column field="nombre" body={""} />
-                <Column field="precio_compra" body={""} />
-                <Column field="precio_venta" body={""} />
-                <Column field="imagen" body={""} />
-              </DataTable>
-            </div>
+          <div className=" row-span-2 col-start-2 row-start-2 h-[590px] min-h-[550px] mt-10 shadow">
+            <ListadoDetalles />
+            <div className="flex w-[100] h-[30%] flex-wrap bg-blue-300">dd</div>
           </div>
-          <div className="flex w-[100] h-[30%] flex-wrap bg-blue-300">dd</div>
         </div>
       </div>
     </div>
