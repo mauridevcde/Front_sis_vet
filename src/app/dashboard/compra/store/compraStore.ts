@@ -9,23 +9,30 @@ type CompraState = {
   proveedor: Proveedor | null;
   compra: Compra;
   detalle_compra: DetalleCompra[];
-
+  subtotal: number;
+  iva: number;
+  total: number;
+  openModalProveedor: boolean;
   addProducto: (producto: Producto) => void;
+  addProveedor: (proveedor: Proveedor) => void;
   removeProducto: (id: string) => void;
   decreaseProducto: (id: number) => void;
   addDetalle_compra: (detalle_compra: DetalleCompra) => void;
   updateCantidad: (id_producto: number, nuevaCantidad: number) => void;
-
   clearCompra: () => void;
   calcularTotales: () => void;
-  //
+  modalProveedor: (key: boolean) => void;
 };
 
-export const useCompraStore = create<CompraState>((set) => ({
+export const useCompraStore = create<CompraState>((set, get) => ({
   productos: [],
-  proveedor: null,
+  proveedor: {} as Proveedor,
   compra: {} as Compra,
   detalle_compra: [],
+  subtotal: 0,
+  iva: 0,
+  total: 0,
+  openModalProveedor: false,
 
   //ejecucion de agregar productos al store.
   addProducto: (producto: Producto) =>
@@ -94,6 +101,11 @@ export const useCompraStore = create<CompraState>((set) => ({
       detalle_compra: [...state.detalle_compra, detalle_compra],
     })),
 
+  addProveedor: (proveedor: Proveedor) =>
+  set((state) => ({
+    proveedor: proveedor,
+  })),
+
   clearCompra: () =>
     set(() => ({
       productos: [],
@@ -104,5 +116,16 @@ export const useCompraStore = create<CompraState>((set) => ({
 
   calcularTotales: () => {
     // Implementar lógica de cálculo de totales aquí si es necesario
+    const subtotal = get().productos.reduce(
+      (sum, p) => sum + p.precio_compra * p.cantidad,
+      0
+    );
+    const iva = subtotal * 0.1; // Ejemplo: IVA 10%
+    set({ subtotal, iva, total: subtotal + iva });
+  },
+  modalProveedor: (key) => {
+    console.log('estoy en compra store: ', key);
+    
+    set({ openModalProveedor: key });
   },
 }));

@@ -9,9 +9,10 @@ import { useCompraStore } from "../store/compraStore";
 export default function Listadoproductos({ producto }: Producto) {
   const productos = useCompraStore((state) => state.productos);
   const setProductsDetails = useCompraStore((state) => state.addProducto); // Assuming your store has a setProductos action
-  const setRemoveDetails = useCompraStore((state) => state.removeProducto); // Assuming your store has a setProductos action
   const setUpdateDetails = useCompraStore((state) => state.updateCantidad); // Assuming your store has a setProductos action
   const setDecreaseDetails = useCompraStore((state) => state.decreaseProducto); // Assuming your store has a setProductos action
+  const calulateTotal = useCompraStore((state) => state.calcularTotales); // Assuming your store has a setProductos action
+  
   const productoEnCarrito = productos.find(
     (p) => p.id_producto === producto.id_producto
   );
@@ -19,15 +20,18 @@ export default function Listadoproductos({ producto }: Producto) {
 
   const increaseQuantity = (data: Producto) => {
     setProductsDetails({ ...data });
+    calulateTotal()
   };
 
   const handleManualChange = (value: number) => {
-    const cantidad = Math.max(1, value);
+    const cantidad = Math.max(0, value);
     setUpdateDetails(producto.id_producto, cantidad);
+    calulateTotal()
   };
 
   const decreaseQuantity = (product: Producto) => {
     setDecreaseDetails(product.id_producto);
+    calulateTotal()
   };
 
   const getStockSeverity = () => {

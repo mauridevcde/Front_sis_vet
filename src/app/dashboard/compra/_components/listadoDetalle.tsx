@@ -6,10 +6,16 @@ import { Button } from "primereact/button";
 
 export default function ListadoDetalles() {
   const productos = useCompraStore((state) => state.productos);
+  const calulateTotal = useCompraStore((state) => state.calcularTotales);
   const setRemoveDetails = useCompraStore((state) => state.removeProducto); // Assuming your store has a setProductos action
+  const subTotal = useCompraStore((state) => state.subtotal); // Assuming your store has a setProductos action
 
   const confirmDeleteProduct = (product) => {
     setRemoveDetails(product.id_producto);
+    calulateTotal();
+  };
+  const mostrarSubTotal = () => {
+    return <>{subTotal}</>;
   };
 
   const actionBodyTemplate = (rowData) => {
@@ -53,7 +59,7 @@ export default function ListadoDetalles() {
           />
           <Column field="precio_compra" body={""} header="Precio" />
           <Column field="cantidad" body={""} header="Cantidad" />
-          <Column field="cantidad" body={""} header="Total" />
+          <Column field="" body={mostrarSubTotal} header="SubTotal" />
           <Column field="" body={actionBodyTemplate} header="Borrar" />
         </DataTable>
       )}
