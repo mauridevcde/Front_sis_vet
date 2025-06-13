@@ -7,6 +7,9 @@ import { useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { formatToLocalSqlDatetime } from "@/app/utils/utils";
+import { Search } from "lucide-react";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 
 export default function Compras() {
   const [filtro, setFiltro] = useState("");
@@ -27,7 +30,7 @@ export default function Compras() {
     <div className="@container ">
       {/* grilla padre */}
       <div className="grid grid-cols-1 grid-rows-1 ">
-        <div className="grid grid-cols-[60%_40%] grid-rows-[90px_100px] ">
+        <div className="grid grid-cols-[50%_50%] grid-rows-[90px_100px] ">
           <div className="col-span-1 h-full  ">
             <div className="flex flex-col gap-4">
               {/* Input de filtro */}
@@ -78,44 +81,71 @@ export default function Compras() {
             )}
           </div>
           {/* seccion derecha de inputs */}
-          <div className="bg-red-500  col-start-2 row-start-1  ">
+          <div className="  col-start-2 row-start-1 h-31 rounded shadow ">
             {/* Header con título */}
-            <div className="flex justify-between items-center p-2 border-b border-red-600">
-              {/* Contenido de datos */}
-              <div className="p-3 text-white space-y-2">
-                <div className="grid grid-cols-2 gap-1 items-center">
-                  <span className="text-sm opacity-80">ID:</span>
-                  <InputText></InputText>
 
-                  <span className="text-sm opacity-80">Fecha:</span>
-                  <span className="text-sm font-medium">
-                    {formatToLocalSqlDatetime(new Date())}
-                  </span>
+            {/* Contenido de datos */}
 
-                  <span className="text-sm opacity-80">Proveedor:</span>
-
-                  {/* Input para Proveedor*/}
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Seleccione proveedor"
-                      className="w-full p-1.5 text-sm text-gray-800 rounded border border-gray-300 focus:outline-none focus:ring-1 focus:ring-red-300"
-                    />
-                    <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-500">
-                      <i
-                        className="pi pi-chevron-down"
-                        style={{ fontSize: "12px" }}
-                      ></i>
-                    </button>
-                  </div>
+            <div className="flex p-2 h-[100%] flex-wrap ">
+              <div className="flex w-[100%]">
+                <span className="text-sm opacity-80 mt-1">ID COMPRA:</span>
+                <InputText
+                  type="text"
+                  disabled
+                  className="p-inputtext-sm"
+                  style={{ width: "200px", height: "10px", marginLeft: "10px" }}
+                ></InputText>
+              </div>
+              <div className="flex  w-[100%]">
+                <span className="text-sm opacity-80">Fecha:</span>
+                <span className="text-sm font-medium ml-2">
+                  {formatToLocalSqlDatetime(new Date())}
+                </span>
+              </div>
+              <div className="flex  w-[100%]">
+                <span className="text-sm opacity-80">Proveedor:</span>
+                <div className="p-inputgroup flex-1">
+                  <InputText
+                    id="id_proveedor"
+                    value={""}
+                    disabled
+                    placeholder="Busca el proveedor"
+                    style={{
+                      width: "200px",
+                      height: "10px",
+                      marginLeft: "10px",
+                    }}
+                  />
+                  <Button
+                    style={{ width: "50px", height: "10px" }}
+                    onClick={() => ""}
+                    icon=<Search />
+                    className="p-button-warning"
+                  />
                 </div>
+                {/* Input para Proveedor*/}
               </div>
             </div>
           </div>
 
-          <div className="bg-blue-900 row-span-2 col-start-2 row-start-2 h-[620px] min-h-[600px]">
-            Grilla de cálculos
+          <div className="bg-blue-900 row-span-2 col-start-2 row-start-2 h-[590px] min-h-[550px] mt-10">
+            <div className="flex w-[100] h-[70%] flex-wrap bg-amber-300">
+              <DataTable
+                value={productos}
+                // headerColumnGroup={headerGroup}
+                // footerColumnGroup={footerGroup}
+                size="small"
+                tableStyle={{ minWidth: "200px", maxWidth: "200px", width:"200px", fontSize: "10px"}}
+              >
+                <Column field="id_producto" />
+                <Column field="nombre" body={""} />
+                <Column field="precio_compra" body={""} />
+                <Column field="precio_venta" body={""} />
+                <Column field="imagen" body={""} />
+              </DataTable>
+            </div>
           </div>
+          <div className="flex w-[100] h-[30%] flex-wrap bg-blue-300">dd</div>
         </div>
       </div>
     </div>

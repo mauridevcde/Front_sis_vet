@@ -118,7 +118,7 @@ export default function DashboardLayout({
   const { nombre_apellido, id_usuario, id_rol } = useAuthStore() as AuthStore;
 
   return (
-    <div className="flex bg-white  w-full h-full   ">
+    <div className="flex bg-white w-full min-h-screen">
       {/* Botón menú hamburguesa solo en móvil */}
       <button
         className="md:hidden fixed bottom-4 right-4 z-50 bg-gray-900 text-white p-2 rounded-full shadow-lg"
@@ -132,15 +132,15 @@ export default function DashboardLayout({
       <aside
         className={`
           bg-gray-900 text-white flex flex-col justify-between
-          transition-transform duration-300 overflow-auto
-          w-auto z-40 text-xs
-          fixed top-0 left-0 h-screen
+          transition-transform duration-300 overflow-y-auto
+          w-64 z-40 text-xs
+          fixed inset-y-0 left-0
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          md:static md:translate-x-0 md:flex
+          md:translate-x-0 md:relative md:w-60
         `}
       >
-        <div>
-          <div className="p-4 flex items-center text-xl font-bold">
+        <div className="flex flex-col h-full">
+          <div className="p-4 flex items-center text-xl font-bold sticky top-0 bg-gray-900 z-10">
             <span className="text-indigo-400">@</span>
             <span className="ml-2">Sis-Pet</span>
             {/* Botón cerrar menú en móvil */}
@@ -152,7 +152,7 @@ export default function DashboardLayout({
               <CloseIcon className="w-6 h-6" />
             </button>
           </div>
-          <nav className="mt-2 space-y-4">
+          <nav className="mt-2 space-y-4 flex-1 overflow-y-auto">
             {navItems.map(({ name, icon: Icon, href, btnDown, submenu }) => (
               <div key={name}>
                 {btnDown ? (
@@ -198,12 +198,12 @@ export default function DashboardLayout({
               </div>
             ))}
           </nav>
-        </div>
-        <div className="p-4">
-          <button className="flex items-center space-x-2 text-sm text-gray-400 hover:text-white">
-            <Settings className="w-4 h-4" />
-            <span>Settings</span>
-          </button>
+          <div className="p-4 sticky bottom-0 bg-gray-900">
+            <button className="flex items-center space-x-2 text-sm text-gray-400 hover:text-white">
+              <Settings className="w-4 h-4" />
+              <span>Settings</span>
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -216,10 +216,10 @@ export default function DashboardLayout({
       )}
 
       {/* Main */}
-      <main className="flex-2 bg-white w-auto  ml-0 transition-all duration-300">
-        <header className="flex items-center justify-between px-6 py-4  bg-white shadow-md">
+      <main className="flex-1 bg-white min-h-screen md:ml-0 transition-all duration-300">
+        <header className="flex items-center justify-between px-6 py-4 bg-white shadow-md sticky top-0 z-20">
           <div className="w-1 px-3 py-2 bordertext-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-         
+
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <Image
@@ -229,17 +229,18 @@ export default function DashboardLayout({
                 height={32}
                 className="rounded-full"
               />
-              <span className="text-sm font-medium text-gray-700">
-                {nombre_apellido || "Usuario Anónimo"}
-              </span>
-              <br />
-              <span className="text-xs text-gray-500">
-                ID: {id_usuario || "N/A"} - Rol: {id_rol || "N/A"}
-              </span>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700">
+                  {nombre_apellido || "Usuario Anónimo"}
+                </span>
+                <span className="text-xs text-gray-500">
+                  ID: {id_usuario || "N/A"} - Rol: {id_rol || "N/A"}
+                </span>
+              </div>
             </div>
           </div>
         </header>
-        <div className="grid m-5 grid-cols-1 grid-rows-1 gap-4 justify-center">
+        <div className="p-5">
           {children}
         </div>
       </main>

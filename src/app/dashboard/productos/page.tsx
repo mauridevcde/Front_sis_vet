@@ -489,7 +489,7 @@ export default function Productos() {
               />
               <Button
                 onClick={() => setProveedorModal(true)}
-                icon=<Search />
+                icon=<Search/>
                 className="p-button-warning"
               />
             </div>
