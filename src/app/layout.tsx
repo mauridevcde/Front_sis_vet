@@ -10,10 +10,10 @@ export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
-}) {
+}) {  
   return (
     <html lang="en" >
-      <body className="bg-red-600">
+      <body>
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
