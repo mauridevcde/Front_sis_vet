@@ -12,7 +12,10 @@ type CompraState = {
   subtotal: number;
   iva: number;
   total: number;
+  nroFactura: string;
+
   openModalProveedor: boolean;
+  addNroFactura: (nro: string) => void;
   addProducto: (producto: Producto) => void;
   addProveedor: (proveedor: Proveedor) => void;
   removeProducto: (id: string) => void;
@@ -33,6 +36,7 @@ export const useCompraStore = create<CompraState>((set, get) => ({
   iva: 0,
   total: 0,
   openModalProveedor: false,
+  nroFactura: "",
 
   //ejecucion de agregar productos al store.
   addProducto: (producto: Producto) =>
@@ -102,16 +106,25 @@ export const useCompraStore = create<CompraState>((set, get) => ({
     })),
 
   addProveedor: (proveedor: Proveedor) =>
-  set((state) => ({
-    proveedor: proveedor,
-  })),
+    set((state) => ({
+      proveedor: proveedor,
+    })),
 
   clearCompra: () =>
     set(() => ({
       productos: [],
-      proveedor: null,
+      proveedor: {
+        id_proveedor: 0,
+        descripcion: "",
+        razon_social: "",
+      } as Proveedor,
       compra: {} as Compra,
       detalle_compra: [],
+      subtotal: 0,
+      iva: 0,
+      total: 0,
+      openModalProveedor: false,
+      nroFactura: "",
     })),
 
   calcularTotales: () => {
@@ -120,12 +133,14 @@ export const useCompraStore = create<CompraState>((set, get) => ({
       (sum, p) => sum + p.precio_compra * p.cantidad,
       0
     );
-    const iva = subtotal * 0.1; // Ejemplo: IVA 10%
+    const iva = subtotal / 11; // Ejemplo: IVA 10%
+
     set({ subtotal, iva, total: subtotal + iva });
   },
   modalProveedor: (key) => {
-    console.log('estoy en compra store: ', key);
-    
     set({ openModalProveedor: key });
+  },
+  addNroFactura: (nro) => {
+    set({ nroFactura: nro });
   },
 }));

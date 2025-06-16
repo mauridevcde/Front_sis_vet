@@ -1,3 +1,5 @@
+import ConsultasClinicas from "../dashboard/consultasclinicas/page";
+
 export interface ConsultaClinica {
   id_consulta: number;
   id_cliente: number;

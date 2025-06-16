@@ -8,11 +8,10 @@ import { useCompraStore } from "../store/compraStore";
 
 export default function Listadoproductos({ producto }: Producto) {
   const productos = useCompraStore((state) => state.productos);
-  const setProductsDetails = useCompraStore((state) => state.addProducto); // Assuming your store has a setProductos action
-  const setUpdateDetails = useCompraStore((state) => state.updateCantidad); // Assuming your store has a setProductos action
-  const setDecreaseDetails = useCompraStore((state) => state.decreaseProducto); // Assuming your store has a setProductos action
-  const calulateTotal = useCompraStore((state) => state.calcularTotales); // Assuming your store has a setProductos action
-  
+  const setProductsDetails = useCompraStore((state) => state.addProducto); //
+  const setUpdateDetails = useCompraStore((state) => state.updateCantidad); //
+  const setDecreaseDetails = useCompraStore((state) => state.decreaseProducto); //
+  const calulateTotal = useCompraStore((state) => state.calcularTotales); //
   const productoEnCarrito = productos.find(
     (p) => p.id_producto === producto.id_producto
   );
@@ -20,18 +19,18 @@ export default function Listadoproductos({ producto }: Producto) {
 
   const increaseQuantity = (data: Producto) => {
     setProductsDetails({ ...data });
-    calulateTotal()
+    calulateTotal();
   };
 
   const handleManualChange = (value: number) => {
     const cantidad = Math.max(0, value);
     setUpdateDetails(producto.id_producto, cantidad);
-    calulateTotal()
+    calulateTotal();
   };
 
   const decreaseQuantity = (product: Producto) => {
     setDecreaseDetails(product.id_producto);
-    calulateTotal()
+    calulateTotal();
   };
 
   const getStockSeverity = () => {
@@ -61,7 +60,7 @@ export default function Listadoproductos({ producto }: Producto) {
     <div className="grid gap-1 pt-0">
       <div className="grid grid-cols-1">
         <span className="text-sm font-bold text-black-600 justify-self-center mx-0 p-0">
-          {producto.precio_compra} Gs.
+          {Intl.NumberFormat("es-ES").format(producto.precio_compra)} Gs.
         </span>
       </div>
 

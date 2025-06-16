@@ -240,7 +240,7 @@ export default function DashboardLayout({
             </div>
           </div>
         </header>
-        <div className="p-5">
+        <div className="p-5 ">
           {children}
         </div>
       </main>

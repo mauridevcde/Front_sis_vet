@@ -25,30 +25,21 @@ export default function ModalProveedorCompra() {
       razon_social: event.data.razon_social,
       ruc: event.data.ruc,
       direccion: event.data.direccion,
-      estado: event.data.estado
-    })
+      estado: event.data.estado,
+    });
     toast.current?.show({
       severity: "info",
       summary: "Proveedor Seleccionado!",
-      detail: `Nombre: ${event.data.descripcion}`,
+      detail: `Descripcion: ${event.data.descripcion}`,
       life: 3000,
     });
     setOpenModal(false);
   };
-  const onRowUnselectProv = (event: any) => {
-    toast.current?.show({
-      severity: "warn",
-      summary: "Proveedor Desmarcado!",
-      detail: `Nombre: ${event.data.descripcion}`,
-      life: 3000,
-    });
-  };
+
   const { data: proveedores = [] } = useQuery({
     queryKey: ["proveedor"],
     queryFn: getAllProveedores,
   });
-
-  console.log("estoy en modal de proveedores", openModal);
 
   return (
     <>
@@ -66,8 +57,7 @@ export default function ModalProveedorCompra() {
             <Button
               className="bg-bluegray-600"
               label="Cancelar"
-              icon="pi
-                      pi-times"
+              icon="pi pi-times"
               onClick={() => setOpenModal(false)}
               size="small"
               rounded
@@ -83,7 +73,6 @@ export default function ModalProveedorCompra() {
           onSelectionChange={(e) => setSelectedProveedor(e.value)}
           dataKey="id_proveedor"
           onRowSelect={onRowSelectProv}
-          onRowUnselect={onRowUnselectProv}
           metaKeySelection={false}
           tableStyle={{ minWidth: "50rem", fontSize: "10px" }}
         >

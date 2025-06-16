@@ -8,14 +8,17 @@ export default function ListadoDetalles() {
   const productos = useCompraStore((state) => state.productos);
   const calulateTotal = useCompraStore((state) => state.calcularTotales);
   const setRemoveDetails = useCompraStore((state) => state.removeProducto); // Assuming your store has a setProductos action
-  const subTotal = useCompraStore((state) => state.subtotal); // Assuming your store has a setProductos action
 
   const confirmDeleteProduct = (product) => {
     setRemoveDetails(product.id_producto);
     calulateTotal();
   };
-  const mostrarSubTotal = () => {
-    return <>{subTotal}</>;
+  const mostrarSubTotal = (rowData) => {
+    const Subtotal = rowData.cantidad * rowData.precio_compra;
+    return <>{Intl.NumberFormat("es-ES").format(Subtotal)}</>;
+  };
+  const mostrarPrecioCompra = (rowData) => {
+    return <>{Intl.NumberFormat("es-ES").format(rowData.precio_compra)}</>;
   };
 
   const actionBodyTemplate = (rowData) => {
@@ -57,7 +60,7 @@ export default function ListadoDetalles() {
             style={{ width: "300px" }}
             header="Descripcion"
           />
-          <Column field="precio_compra" body={""} header="Precio" />
+          <Column field="" body={mostrarPrecioCompra} header="Precio" />
           <Column field="cantidad" body={""} header="Cantidad" />
           <Column field="" body={mostrarSubTotal} header="SubTotal" />
           <Column field="" body={actionBodyTemplate} header="Borrar" />
