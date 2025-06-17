@@ -113,7 +113,7 @@ export default function Listadoproductos({ producto }: Producto) {
       <Card
         header={header}
         footer={footer}
-        className="p-0 !rounded-lg !shadow-md hover:!shadow-lg !transition-shadow !duration-300 !border-0 !overflow-hidden !bg-white"
+        className="p-0 hover:scale-102 !rounded-lg !shadow-md hover:!shadow-lg !transition-shadow !duration-300 !border-0 !overflow-hidden !bg-white"
       >
         {/* Ajusté el padding aquí */}
         <h3 className="font-semibold text-xs text-gray-800 leading-tight overflow-hidden m-0">
