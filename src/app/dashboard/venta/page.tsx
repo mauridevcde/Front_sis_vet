@@ -11,7 +11,7 @@ export default function Venta() {
           <FilterProducts />
         </div>
         <div className="col-span-2 row-span-3 col-start-4 bg-blue-400">2</div>
-        <div className="col-span-3 row-span-4 row-start-2 h-screen bg-gray-500">
+        <div className="col-span-3 row-span-4 row-start-2 h-screen">
           <ListaProducts />
         </div>
         <div className="col-span-2 row-span-2 col-start-4 row-start-4 bg-green-400">
