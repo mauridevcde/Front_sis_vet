@@ -24,7 +24,7 @@ export default function CardsProduct() {
       onClick={() => {
         console.log("producto seleccionado");
       }}
-      className="flex h-50 w-50 overflow-clip flex-wrap shadow-xl rounded-sm hover:bg-sky-700 hover:scale-102"
+      className="flex h-50 w-50 overflow-clip cursor-pointer flex-wrap shadow-xl rounded-sm hover:bg-sky-700 hover:scale-102"
     >
       <img
         className="flex w-screen h-[70%] object-cover transition-transform duration-300"

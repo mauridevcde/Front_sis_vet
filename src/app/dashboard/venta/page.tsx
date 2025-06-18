@@ -2,6 +2,7 @@
 
 import FilterProducts from "./components/filterProducts";
 import ListaProducts from "./components/listaProducts";
+import ListProductsSelected from "./components/listProductsSelected";
 
 export default function Venta() {
   return (
@@ -10,7 +11,9 @@ export default function Venta() {
         <div className="col-span-3 bg-gray-100 h-[50px] rounded-sm shadow ">
           <FilterProducts />
         </div>
-        <div className="col-span-2 row-span-3 col-start-4 bg-blue-400">2</div>
+        <div className="col-span-2 row-span-3 col-start-4 bg-blue-400">
+          <ListProductsSelected/>
+        </div>
         <div className="col-span-3 row-span-4 row-start-2 h-screen">
           <ListaProducts />
         </div>
