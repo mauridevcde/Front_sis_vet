@@ -1,10 +1,10 @@
 export interface Producto {
-   cantidad?:  number | undefined; //esto no esta en la base de datos, es utilizado en la compra
+  cantidad?:  number | undefined; //esto no esta en la base de datos, es utilizado en la compra
   id_producto: number;
   nombre: string;
   fecha_vencimiento: string; // ISO format (e.g., "2022-04-12T04:00:00")
   id_proveedor: number;
-  stock: number;
+  stock: number; 
   precio_compra: number;
   precio_venta: number;
   unidad_medida: string;

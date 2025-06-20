@@ -6,6 +6,7 @@ import ListaProducts from "./components/listaProducts";
 import ListProductsSelected from "./components/listProductsSelected";
 
 export default function Venta() {
+ 
   return (
     <>
       <div className="grid grid-cols-5 auto-rows-min gap-2 w-full h-full ">

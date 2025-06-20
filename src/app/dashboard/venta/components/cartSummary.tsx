@@ -1,7 +1,14 @@
 import { Trash } from "lucide-react";
 import React from "react";
+import { useVentaStore } from "../store/storeVenta";
 
 export default function CartSummary() {
+  const subTotal = useVentaStore((state) => state.subTotal);
+  const iva10 = useVentaStore((state) => state.iva10);
+  const total = useVentaStore((state) => state.Total);
+
+  console.log(subTotal);
+  
   return (
     <div className="bg-white rounded-lg shadow-md p-3 w-full max-w-md mx-auto">
       {/* Resumen de items */}
@@ -9,7 +16,9 @@ export default function CartSummary() {
         <p className="font-medium text-gray-700">6 items</p>
         <div className="flex justify-between mt-1">
           <span className="text-gray-600">Subtotal:</span>
-          <span className="font-medium">$62.10</span>
+          <span className="font-medium">
+            {Intl.NumberFormat("es-ES").format(subTotal)} Gs.
+          </span>
         </div>
       </div>
 
@@ -20,7 +29,9 @@ export default function CartSummary() {
             Iva:
           </button>
           <div className="flex items-center">
-            <span className="text-black">$3.10</span>
+            <span className="text-black">
+              {Intl.NumberFormat("es-ES").format(iva10)}
+            </span>
           </div>
         </div>
       </div>
@@ -29,7 +40,7 @@ export default function CartSummary() {
       <div className="mb-2">
         <div className="flex justify-between font-bold text-lg">
           <span>Total:</span>
-          <span>$59.00</span>
+          <span>{Intl.NumberFormat("es-ES").format(total)}</span>
         </div>
       </div>
 
@@ -37,7 +48,7 @@ export default function CartSummary() {
 
       <div className="flex justify-between items-center">
         <button className="w-[60px] bg-gray-500 hover:bg-gray-700 cursor-pointer text-white py-3 px-4 rounded-lg font-medium transition-colors">
-             <Trash />
+          <Trash />
         </button>
         <button className="w-[85%] bg-green-500 hover:bg-green-700 cursor-pointer text-white py-3 px-4 rounded-lg font-medium transition-colors">
           Vender

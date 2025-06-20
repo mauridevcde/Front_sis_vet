@@ -1,45 +1,35 @@
 "use client";
 
-export default function CardsProduct() {
-  // function obtenerIndiceAleatorio(array: string[]) {
-  //   if (!array || array.length === 0) {
-  //     return -1; // Retorna -1 si el array está vacío o no existe
-  //   }
-  //   const nroRandom = Math.floor(Math.random() * array.length);
-  //   return array[nroRandom];
-  // }
+import { Producto } from "@/app/interfaces/productos.interface";
+import { obtenerIndiceAleatorio } from "../utils/colorsRandom";
+import { useVentaStore } from "../store/storeVenta";
 
-  // const colores = [
-  //   "#002440",
-
-  //   "#373D33",
-
-  //   "#006EC0",
-  // ];
-
-  // console.log("soy indice random", obtenerIndiceAleatorio(colores));
+export default function CardsProduct(producto: Producto) {
+  const aggProductStore = useVentaStore((state) => state.addProducto);
+  const calcularTotales = useVentaStore((state) => state.calcularTotales);
 
   return (
     <div
       onClick={() => {
-        console.log("producto seleccionado");
+        aggProductStore(producto);
+        calcularTotales();
       }}
       className="flex h-50 w-50 overflow-clip cursor-pointer flex-wrap shadow-xl rounded-sm hover:bg-sky-700 hover:scale-102"
     >
       <img
         className="flex w-screen h-[70%] object-cover transition-transform duration-300"
-        src={"https://www.superseis.com.py/images/thumbs/0252073.jpeg"}
+        src={producto.imagen}
       ></img>
 
       <div
         className="flex w-screen h-[30%] flex-wrap"
-        style={{ backgroundColor: "#809bce" }}
+        style={{ backgroundColor: obtenerIndiceAleatorio().toString() }}
       >
         <h1 className="font-semibold text-xs leading-tight overflow-hidden p-1 text-white ">
-          PURINA DOG CHOW PERRO SABOR CARNE Y POLLO 1.5 KG
+          {producto.nombre}
         </h1>
         <span className="text-sm font-bold self-center ml-3 text-white  ">
-          58.000 Gs.
+          {Intl.NumberFormat("es-ES").format(producto.precio_venta)} Gs.
         </span>
       </div>
     </div>
