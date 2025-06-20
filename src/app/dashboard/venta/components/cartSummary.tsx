@@ -9,6 +9,7 @@ import { postVentas } from "@/app/_api/ventas/postVentas";
 import { DetalleVenta } from "@/app/interfaces/venta/detalle_ventas.interface";
 import { Venta } from "@/app/interfaces/venta/venta.interface";
 import { VentaCompleta } from "@/app/interfaces/venta/ventaCompleta.interface";
+import { generarPDFVenta } from "./ticket_de_venta/ticketDeVenta";
 
 export default function CartSummary() {
   const subTotal = useVentaStore((state) => state.subTotal);
@@ -22,15 +23,26 @@ export default function CartSummary() {
   const toast = useRef<Toast>(null);
 
   const mutationNewVenta = useMutation({
-    mutationFn: postVentas,
-    onSuccess: () => {
+    mutationFn: async (data: VentaCompleta): Promise<{ id_venta: number }> => {
+      const response = await postVentas(data);
+      // Suponiendo que el id_venta está en response.data.id_venta
+      return { id_venta: response.data.id_venta };
+    },
+    onSuccess: (response: { id_venta: number }) => {
+      const ventaConId = { ...venta, id_venta: response.id_venta };
+      generarPDFVenta(ventaConId, detalles, {
+        efectivo: venta.total,
+        cambio: 0,
+      });
+
       toast.current?.show({
         severity: "success",
         summary: "Éxito",
-        detail: "Venta realizada con exito!",
+        detail: "Venta realizada con éxito!",
         life: 3000,
       });
-      queryClient.invalidateQueries({ queryKey: ["productos"] });
+
+      queryClient.invalidateQueries({ queryKey: ["productosVentas"] });
       clearVenta();
     },
     onError: (error: any) => {
@@ -42,45 +54,61 @@ export default function CartSummary() {
       });
     },
   });
-
-  const ejecutarVenta = () => {
-    const detalles: DetalleVenta[] = productos.map((value) => {
-      return {
-        id_producto: value.id_producto,
-        id_usuario: id_usuario,
-        cantidad: value.cantidad ?? 0,
-        precio_unitario: Math.floor(value.precio_venta),
-        subtotal: Math.floor(value.precio_venta * (value.cantidad ?? 0)),
-        estado: 1,
-        iva: Math.floor(value.precio_venta / 11),
-      };
-    });
-    const venta: Venta = {
-      id_cliente:
-        id_cliente &&
-        typeof id_cliente === "object" &&
-        "id_cliente" in id_cliente
-          ? (id_cliente as any).id_cliente
-          : typeof id_cliente === "number"
-          ? id_cliente
-          : 0,
+  const detalles: DetalleVenta[] = productos.map((value) => {
+    return {
+      id_producto: value.id_producto,
       id_usuario: id_usuario,
-      fecha_venta: formatToLocalSqlDatetime(new Date()),
-      total: Math.floor(total),
-      estado: "pagada",
-      tipo_pago: "efectivo",
-      tipo_venta: "contado",
-      subTotal: Math.floor(subTotal),
-      Iva0: 0,
-      Iva5: 0,
-      Iva10: Math.floor(iva10),
-      TotalDescuento: 0,
-      id_caja: "0",
+      cantidad: value.cantidad ?? 0,
+      precio_unitario: Math.floor(value.precio_venta),
+      subtotal: Math.floor(value.precio_venta * (value.cantidad ?? 0)),
+      estado: 1,
+      iva: Math.floor(value.precio_venta / 11),
     };
-    const dataParaVenta: VentaCompleta = {
-      venta,
-      detalles,
-    };
+  });
+  const venta: Venta = {
+    id_cliente:
+      id_cliente && typeof id_cliente === "object" && "id_cliente" in id_cliente
+        ? (id_cliente as any).id_cliente
+        : typeof id_cliente === "number"
+        ? id_cliente
+        : 0,
+    id_usuario: id_usuario,
+    fecha_venta: formatToLocalSqlDatetime(new Date()),
+    total: Math.floor(total),
+    estado: "pagada",
+    tipo_pago: "efectivo",
+    tipo_venta: "contado",
+    subTotal: Math.floor(subTotal),
+    Iva0: 0,
+    Iva5: 0,
+    Iva10: Math.floor(iva10),
+    TotalDescuento: 0,
+    id_caja: "0",
+  };
+  const dataParaVenta: VentaCompleta = {
+    venta,
+    detalles,
+  };
+  const ejecutarVenta = () => {
+    if (id_cliente?.id_cliente == null || id_cliente.id_cliente == undefined) {
+      console.log("No existe cliente!");
+      toast.current?.show({
+        severity: "warn",
+        summary: "Seleccione el cliente!",
+        life: 1500,
+      });
+      return;
+    }
+
+    if (productos.length <= 0) {
+      toast.current?.show({
+        severity: "info",
+        summary: "Seleccione al menos 1 producto!",
+        life: 1500,
+      });
+      return;
+    }
+
     mutationNewVenta.mutate(dataParaVenta);
   };
 
@@ -132,7 +160,7 @@ export default function CartSummary() {
           onClick={() => clearVenta()}
         ></Button>
         <Button
-          disabled={productos.length > 0 ? false : true}
+          disabled={productos.length === 0 || mutationNewVenta.isPending}
           label="Vender"
           severity="success"
           className="w-[60%]"

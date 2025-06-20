@@ -29,7 +29,7 @@ export default function ResultadoDetalles() {
         summary: "Éxito",
         detail: "Compra realizada con exito, verifica el stock del producto!",
         life: 3000,
-      });
+      }); 
       queryClient.invalidateQueries({ queryKey: ["productos"] });
       limpiarCompra();
     },

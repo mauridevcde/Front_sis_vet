@@ -11,7 +11,7 @@ import { useEffect, useRef } from "react";
 export default function ListaProducts() {
   const filtered = useProductStore((state) => state.filteredProducts);
   const cargaProducto = useProductStore((state) => state.setProducts);
-  const alreadySet = useRef(false); // <-- bandera de protección
+
 
   const { data: productos = [], isPending } = useQuery<Producto[]>({
     queryKey: ["productosVentas"],
@@ -19,12 +19,10 @@ export default function ListaProducts() {
   });
 
   useEffect(() => {
-    if (!alreadySet.current && productos.length > 0) {
-      cargaProducto(productos);
-      alreadySet.current = true;
+    if (productos.length > 0) {
+      cargaProducto(productos); // actualiza Zustand cada vez que cambia la data
     }
-  }, [cargaProducto, productos]);
-
+  }, [productos, cargaProducto]);
 
   return (
     <div className="flex rounded-2xl flex-col sm:flex-row flex-wrap gap-2 justify-center p-2 h-full overflow-auto">
