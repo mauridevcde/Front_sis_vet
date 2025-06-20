@@ -128,13 +128,6 @@ export default function LoginForm() {
           <br />
           {mensaje === "Iniciando sesión..." && (
             <div className="flex flex-col items-center justify-center mt-2">
-              <Image
-                src="/successLogin.gif"
-                alt="Cargando"
-                width={32}
-                height={32}
-                className="animate-bounce mb-2"
-              />
               <span className="text-sm text-green-200 font-semibold animate-pulse">
                 ✅Redirigiéndote al panel principal...
               </span>

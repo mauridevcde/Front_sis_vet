@@ -10,11 +10,11 @@ type ventaState = {
   cliente: Cliente | null;
   openModalClientes: boolean;
 
-  addProducto: (producto: Producto) => void;
+  addProducto: (producto: Producto) => boolean;
   addCliente: (cliente: Cliente) => void;
   removeProducto: (id: number) => void;
   decreaseProducto: (id: number) => void;
-  updateCantidad: (id_producto: number, nuevaCantidad: number) => void;
+  updateCantidad: (id_producto: number, nuevaCantidad: number) => boolean;
   clearVenta: () => void;
   calcularTotales: () => void;
   modalClientes: (key: boolean) => void;
@@ -28,23 +28,29 @@ export const useVentaStore = create<ventaState>((set, get) => ({
   cliente: null,
   openModalClientes: false,
 
-  addProducto: (producto: Producto) =>
-    set((state) => {
-      //verifica si existe el producto.
-      const existe = state.productos.find(
-        (p: Producto) => p.id_producto === producto.id_producto
-      );
-      //caso que varie la cantidad lo suma
-      const productos = existe
-        ? state.productos.map((p: Producto) =>
-            p.id_producto === producto.id_producto
-              ? { ...p, cantidad: (p.cantidad ?? 0) + 1 }
-              : p
-          )
-        : [...state.productos, { ...producto, cantidad: 1 }];
+  addProducto: (producto) => {
+    const state = get();
+    const existe = state.productos.find(
+      (p) => p.id_producto === producto.id_producto
+    );
+    const nuevaCantidad = existe ? (existe.cantidad ?? 0) + 1 : 1;
 
-      return { productos };
-    }),
+    if (producto.stock < nuevaCantidad) {
+      return false; // stock insuficiente
+    }
+
+    const productos = existe
+      ? state.productos.map((p) =>
+          p.id_producto === producto.id_producto
+            ? { ...p, cantidad: nuevaCantidad }
+            : p
+        )
+      : [...state.productos, { ...producto, cantidad: 1 }];
+
+    set({ productos });
+    state.calcularTotales();
+    return true; // agregado correctamente
+  },
   addCliente: (cliente) => set({ cliente }),
   removeProducto: (id) => {
     const nuevos = get().productos.filter((p) => p.id_producto !== id);
@@ -65,15 +71,43 @@ export const useVentaStore = create<ventaState>((set, get) => ({
     get().calcularTotales();
   },
   updateCantidad: (id_producto, nuevaCantidad) => {
+    if (!nuevaCantidad || nuevaCantidad < 1) return false;
+
+    let excedeStock = false;
+
     const productos = get().productos.map((p) => {
       if (p.id_producto === id_producto) {
-        return { ...p, cantidad: nuevaCantidad };
+        const stock = p.stock ?? 0;
+        if (nuevaCantidad > stock) {
+          excedeStock = true;
+        }
+
+        return {
+          ...p,
+          cantidad: Math.min(nuevaCantidad, stock),
+        };
       }
       return p;
     });
 
     set({ productos });
     get().calcularTotales();
+
+    return !excedeStock;
+  },
+
+  calcularTotales: () => {
+    const productos = get().productos;
+    const subTotal = productos.reduce((sum, p) => {
+      const precio = p.precio_venta ?? 0;
+      const cantidad = p.cantidad ?? 0;
+      return sum + precio * cantidad;
+    }, 0);
+
+    const iva10 = subTotal / 11;
+    const Total = subTotal;
+
+    set({ subTotal, iva10, Total });
   },
   clearVenta: () =>
     set({
@@ -82,18 +116,7 @@ export const useVentaStore = create<ventaState>((set, get) => ({
       iva10: 0,
       subTotal: 0,
       Total: 0,
+      openModalClientes: false,
     }),
-  calcularTotales: () => {
-    const productos = get().productos;
-    const subTotal = productos.reduce(
-      (sum, p) => sum + p.precio_venta * p.cantidad,
-      0
-    );
-    const iva10 = subTotal / 11;
-    const Total = subTotal;
-
-    set({ subTotal, iva10, Total });
-  },
-
   modalClientes: (key) => set({ openModalClientes: key }),
 }));

@@ -1,16 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// interface AuthState {
-//   token: string;
-//   nombre_apellido: string;
-//   id_usuario: number;
-//   id_rol: number;
-//   isAuth: boolean;
-//   setAuthInfo: (profileAuth: AuthStore) => void;
-//   setLogout: () => void;
 
-// }
 
 interface AuthStore {
   token: string;

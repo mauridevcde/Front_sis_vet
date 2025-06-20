@@ -25,6 +25,7 @@ export default function ListaProducts() {
     }
   }, [cargaProducto, productos]);
 
+
   return (
     <div className="flex rounded-2xl flex-col sm:flex-row flex-wrap gap-2 justify-center p-2 h-full overflow-auto">
       {isPending ? (

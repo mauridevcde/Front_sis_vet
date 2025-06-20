@@ -17,7 +17,7 @@ export default function ResultadoDetalles() {
   const producto = useCompraStore((state) => state.productos);
   const nroFactura = useCompraStore((state) => state.nroFactura);
   const limpiarCompra = useCompraStore((state) => state.clearCompra);
-  const { id_usuario } = useAuthStore();
+  const { id_usuario } = useAuthStore() as { id_usuario: number };
   const toast = useRef<Toast>(null);
   const queryClient = useQueryClient();
 
