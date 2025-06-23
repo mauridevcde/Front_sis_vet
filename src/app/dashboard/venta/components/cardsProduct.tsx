@@ -53,7 +53,7 @@ export default function CardsProduct(producto: Producto) {
           className="flex w-screen h-[30%] flex-wrap"
           style={{ backgroundColor: obtenerIndiceAleatorio().toString() }}
         >
-          <h1 className="font-semibold text-xs leading-tight overflow-hidden p-1 text-white ">
+          <h1 className="font-semibold  leading-tight overflow-hidden p-1 text-white " style={{fontSize: '10px'}}>
             {producto.nombre}
           </h1>
           <span className="text-sm font-bold self-center ml-3 text-white  ">
