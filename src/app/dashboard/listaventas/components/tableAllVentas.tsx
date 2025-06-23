@@ -8,8 +8,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { EyeIcon } from "lucide-react";
-
-
+import ModalDetalleVenta from "./modalDetalleVenta";
 
 export default function TablaAllVentas({ ventas, isPending }: any) {
   const [globalFilter, setGlobalFilter] = useState<string | null>(null);
@@ -55,15 +54,13 @@ export default function TablaAllVentas({ ventas, isPending }: any) {
     setOpenModal(true);
     setIdVenta(id);
   };
-  const numberConverter = (rowData) =>{
-    console.log(rowData);
-    
-    return <>{Intl.NumberFormat("es-ES").format(rowData.total)} Gs. </>
-  }
+  const numberConverter = (rowData) => {
+    return <>{Intl.NumberFormat("es-ES").format(rowData.total)} Gs. </>;
+  };
 
   return (
     <div>
-      {/* <ModalDetalleVenta /> */}
+      <ModalDetalleVenta />
       <Toast ref={toast} />
       <div className="p-2 bg-gray-100 text-center rounded shadow text-xs">
         <h1 className="text-base font-semibold text-gray-800">
@@ -88,11 +85,12 @@ export default function TablaAllVentas({ ventas, isPending }: any) {
             >
               <Column field="id_venta" header="Id de la Venta" sortable />
               <Column field="cliente" header="Cliente comprador." sortable />
+              <Column field="usuario" header="Usuario efectuo la venta" />
               <Column
-                field="usuario"
-                header="Usuario efectuo la venta"
+                field="total"
+                body={numberConverter}
+                header="Monto Total de venta"
               />
-              <Column field="total" body={numberConverter} header="Monto Total de venta" />
 
               <Column
                 field="fecha_venta"
