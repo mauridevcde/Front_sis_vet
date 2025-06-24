@@ -1,5 +1,4 @@
 "use client";
-import "primereact/resources/themes/lara-light-indigo/theme.css";
 import React, { useState, useRef } from "react";
 import { classNames } from "primereact/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

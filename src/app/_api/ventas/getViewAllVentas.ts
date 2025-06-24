@@ -5,7 +5,7 @@ interface viewVentas {
 
 }
 
-export const getViewAllVenta = async (): Promise<viewVentas[]> => {
+export const getAllVentasYear = async (): Promise<viewVentas[]> => {
   try {
     const response = await axios.get("api/ventaJoin");
 
