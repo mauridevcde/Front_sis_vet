@@ -41,9 +41,9 @@ export const VentaTotalPorMesAnual = () => {
   };
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow-md w-full max-w-sm">
+    <div className="bg-white p-1  ">
       <div className="flex justify-between items-center text-xs text-gray-400">
-        <span>Month to date</span>
+        <span>Meses del Año</span>
         <input
           type="month"
           value={mes}
@@ -51,29 +51,29 @@ export const VentaTotalPorMesAnual = () => {
           className="border px-1 py-[2px] text-xs rounded"
         />
       </div>
-      <div className="text-sm font-semibold text-gray-700 mt-1">Revenue</div>
+      <div className="text-sm font-semibold text-gray-700 mt-1">
+        Ganancia del mes
+      </div>
       <div className="text-3xl font-bold text-gray-900 my-1">
         {isLoading
           ? "Cargando..."
-          : (Array.isArray(data) && data.length > 0
-              ? (data[0].total ?? 0).toLocaleString("es-PY", {
-                  style: "currency",
-                  currency: "PYG",
-                })
-              : "₲0")
-            }
+          : data && data.length > 0
+          ? Intl.NumberFormat("es-PY", {
+              style: "currency",
+              currency: "PYG",
+            }).format(data)
+          : "₲0"}
       </div>
 
-      <div className="h-16 -mx-2">
-        <Chart type="line" data={chartData} options={options} />
-      </div>
+   
 
-      <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+      <div className="flex items-center justify-between  text-xs text-gray-500">
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 bg-purple-500 rounded-full" /> Stripe
+          <Chart  className={'w-full'} type="line" data={chartData} options={options} />
         </span>
-        <span className="text-green-600 font-medium">▲ +6.1%</span>
+       
       </div>
+        <span className="text-green-600 font-medium">▲ +6.1%</span>
     </div>
   );
 };
